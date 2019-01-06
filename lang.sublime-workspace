@@ -1,0 +1,454 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"print",
+				"print_cards"
+			],
+			[
+				"num",
+				"num1"
+			],
+			[
+				"co",
+				"correct_list"
+			],
+			[
+				"col",
+				"coloring"
+			],
+			[
+				"anima",
+				"animate_sunrise"
+			],
+			[
+				"anim",
+				"animate_sunrise"
+			],
+			[
+				"turn",
+				"turn_right"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "m3axis_particle_filter_2d.m",
+			"settings":
+			{
+				"buffer_size": 2668,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/lang/.config/sublime-text-3/Packages/User/Matlab.sublime-build",
+			"settings":
+			{
+				"buffer_size": 103,
+				"encoding": "UTF-8",
+				"line_ending": "Unix",
+				"name": "untitled.sublime-build"
+			}
+		},
+		{
+			"file": "/home/lang/.config/mpv/mpv.conf",
+			"settings":
+			{
+				"buffer_size": 5054,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/Python/Python.sublime-build",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					"Syntax Check"
+				]
+			],
+			[
+				"Packages/Python/Python.sublime-build",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 141.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"sublimerepl mat",
+				"SublimeREPL: Matlab"
+			],
+			[
+				"repl m",
+				"SublimeREPL: Matlab"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"colo",
+				"UI: Select Color Scheme"
+			],
+			[
+				"color",
+				"UI: Select Color Scheme"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Colorsublime: Install Theme"
+			],
+			[
+				"theme",
+				"UI: Select Theme"
+			]
+		],
+		"width": 667.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/lang/Dropbox/2017/MATLAB/exp3_calibrated"
+	],
+	"file_history":
+	[
+		"/home/lang/.config/mpv/mpv.log",
+		"/home/lang/.config/sublime-text-3/Packages/SublimeREPL/config/Matlab/Main.sublime-menu",
+		"/home/lang/Dropbox/2017/MATLAB/exp3_calibrated/m3axis_particle_filter_2d.m",
+		"/home/lang/.config/mpv/mpv.conf",
+		"/home/lang/.config/sublime-text-3/Packages/User/SublimeREPL-python.sublime-build",
+		"/home/lang/.config/sublime-text-3/Packages/SublimeREPL/config/Python/Main.sublime-menu",
+		"/home/lang/Downloads/mpv-master/TOOLS/lua/README.md",
+		"/home/lang/Downloads/mpv-master/TOOLS/lua/autodeint.lua",
+		"/home/lang/Downloads/mpv-master/TOOLS/lua/observe-all.lua",
+		"/home/lang/.pyenv/versions/3.6.2/lib/python3.6/site-packages/cs1graphics.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/##_2017_fall/midterm/p5-4.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/##_2017_fall/midterm/p5-3.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/##_2017_fall/midterm/p5-2.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/##_2017_fall/midterm/p5-1.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/03_Lab/lab6/memen.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/03_Lab/lab6/drawing.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/03_Lab/lab6/fib.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/03_Lab/lab9/test.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/03_Lab/lab7/task1_20171101.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/03_Lab/test.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/03_Lab/lab7/task2_20171031.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/03_Lab/lab9/task3_20171108.py",
+		"/media/lang/wd_3t_red/mnt/#west/BangBros18 - Alex Mae - 1080p.pbf",
+		"/media/lang/wd_3t_red/mnt/Section8-AV/#국내/외장동영상0004.skm",
+		"/home/lang/Downloads/matlab_R2017b_glnxa64/install",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/##_2017_fall/midterm/p5-1_solv.py",
+		"/home/lang/map.yaml",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/03_Lab/17f_lab4_gunter.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/03_Lab/17f_lab4_euclid.py",
+		"/home/lang/Dropbox/KAIST-CS101-TA's/03_Lab/17f_lab4_add.py",
+		"/media/lang/0354-3144/evt_20170921_043444.dat",
+		"/home/lang/ros_android_core/src/android_core/android_15/build.gradle",
+		"/home/lang/ros_android_core/src/android_core/buildscript.gradle",
+		"/home/lang/.AndroidStudio2.3/system/log/idea.log",
+		"/home/lang/ros_android_core/src/android_core/settings.gradle",
+		"/home/lang/ros_android_core/src/android_core/README.md",
+		"/home/lang/ros_android_core/src/android_core/gradle.properties",
+		"/home/lang/android-studio/Install-Linux-tar.txt",
+		"/home/lang/test/catkin_workspace/src/tmp/src/CMakeLists.txt",
+		"/home/lang/test/catkin_workspace/src/README.md",
+		"/home/lang/test/wandrian/src/wandrian_src/wandrian/src/wandrian.cpp",
+		"/home/lang/test/wandrian/src/wandrian_src/wandrian/launch/run_simulator.launch",
+		"/home/lang/Dropbox/2017/ubuntu/mouse_setting",
+		"/home/lang/test/wandrian/src/wandrian_src/wandrian/launch/run_practically.launch",
+		"/home/lang/test/wandrian/src/wandrian_src/wandrian/src/plans/boustrophedon_online/boustrophedon_online.cpp",
+		"/home/lang/test/wandrian/src/wandrian_src/wandrian/src/robot.cpp",
+		"/home/lang/test/wandrian/src/wandrian_src/wandrian/src/main.cpp",
+		"/home/lang/test/catkin_workspace/src/wandrian/test/boustrophedon_test.cpp",
+		"/home/lang/test/catkin_workspace/src/wandrian/test/test.cpp",
+		"/home/lang/test/catkin_workspace/src/wandrian/test/test.sh",
+		"/home/lang/test/catkin_workspace/src/wandrian/launch/environment.launch",
+		"/home/lang/test/catkin_workspace/src/wandrian/models/robot/urdf/robot.urdf.xacro",
+		"/home/lang/test/catkin_workspace/src/wandrian/models/robot/urdf/common_properties.urdf.xacro",
+		"/home/lang/test/catkin_workspace/src/tmp/src/README.md",
+		"/home/lang/test/wandrian/src/wandrian_src/wandrian/src/plans/boustrophedon/README.md",
+		"/home/lang/test/wandrian/src/wandrian_src/wandrian/launch/includes/robot.launch",
+		"/home/lang/test/wandrian/src/wandrian_src/wandrian/launch/environment.launch",
+		"/home/lang/Downloads/coverage_path_planning-master/coverage_path_planner.py",
+		"/home/lang/Downloads/coverage_path_planning-master/pkg/poly_operations/others/chain_combination.py",
+		"/home/lang/Downloads/coverage_path_planning-master/pkg/poly_operations/others/adjacency_edges.py",
+		"/home/lang/OpenNI-Linux-Arm64-2.3/install.sh"
+	],
+	"find":
+	{
+		"height": 42.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "m3axis_particle_filter_2d.m",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2668,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								712,
+								712
+							]
+						],
+						"settings":
+						{
+							"markdonw_live_preview_last_run": 1510552708.7,
+							"syntax": "Packages/Matlab/Matlab.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/home/lang/.config/sublime-text-3/Packages/User/Matlab.sublime-build",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 103,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								103,
+								103
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/home/lang/.config/mpv/mpv.conf",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5054,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4349,
+								4349
+							]
+						],
+						"settings":
+						{
+							"markdonw_live_preview_last_run": 1510555585.59,
+							"syntax": "Packages/ShellScript/Shell-Unix-Generic.sublime-syntax",
+							"word_wrap": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 3627.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 42.0
+	},
+	"input":
+	{
+		"height": 60.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.5,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 362.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/User/Matlab.sublime-build",
+	"project": "lang.sublime-project",
+	"replace":
+	{
+		"height": 78.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"boustrophedon",
+				"src/wandrian/include/plans/boustrophedon_online/boustrophedon_online.hpp"
+			],
+			[
+				"boustrophedon_test",
+				"src/wandrian/test/boustrophedon_test.cpp"
+			],
+			[
+				"bou",
+				"src/wandrian/test/boustrophedon_test.sh"
+			],
+			[
+				"test",
+				"src/wandrian/test/test.cpp"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 349.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
