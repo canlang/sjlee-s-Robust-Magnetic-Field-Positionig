@@ -1,0 +1,7 @@
+load('tm.mat')
+subplot(311)
+plot(testM{1},'x-')
+subplot(312)
+plot(testM{2},'x-')
+subplot(313)
+plot(testM{3},'x-')

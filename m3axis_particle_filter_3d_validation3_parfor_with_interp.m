@@ -1,7 +1,12 @@
 % clear; close all;
+% learning data
 data1 = readtable('batch.csv');
-data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
+% testing data
+% data2 = readtable('20171124 MagCoord3axisData.csv');
+target_rawdata_paths = getNameFolds('rawdata');
+rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{1}));
+trace_info = regexp(target_rawdata_paths{j},'_','split');
 
 %%
 % nParticleCandidate = 500:500:3000;
@@ -157,3 +162,35 @@ print -clipboard -dbitmap
 return
 %%
 notBoxPlot(errMat(5:end,:)',nParticleCandidate(5:end),'style','line','markMedian',true,'interval','SEM')
+
+%% local functions -----------------------------------------------------------------
+% 1st local function
+function nameFolds = getNameFolds(pathFolder)
+d = dir(pathFolder);
+isub = [d(:).isdir]; %# returns logical vector
+nameFolds = {d(isub).name}';
+nameFolds(ismember(nameFolds,{'.','..'})) = [];
+% nameFolds(~cellfun(@isempty,regexp(nameFolds, '\d{6}'))) = [];
+end
+
+% 2nd local function
+function data = resample_rawdata(rawdata,rate)
+% Var1 : 3 vectors of Accelerometer, Var2: norm vector of Acc.
+T_acc = timetable(seconds(rawdata.acc(:,2)/1e9),rawdata.acc(:,3:5),rawdata.acc_norm,...
+    'VariableNames',{'acc','acc_norm'});
+% Var1 : 3 vectors of Gyroscope
+T_gyr = timetable(seconds(rawdata.gyr(:,2)/1e9),rawdata.gyr(:,3:5),...
+    'VariableNames',{'gyr'});
+T_acc = sortrows(T_acc);
+T_gyr = sortrows(T_gyr);
+
+TT = synchronize(T_acc,T_gyr,'regular','linear','TimeStep',seconds(rate));
+
+data.Accelerometer = TT.acc;
+data.Gyroscope = TT.gyr*180/pi;
+data.acc_norm = TT.acc_norm;
+
+data.Time = seconds(TT.Time(:));
+% data.Time = seconds(TT.Time(:)-(TT.Time(1)));
+data.Rate = median(diff(data.Time)); % cal sample rate
+end

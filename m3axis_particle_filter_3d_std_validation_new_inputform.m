@@ -1,9 +1,58 @@
 clear; close all;
+
+% Video save
+video_flag = true;
+video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_3';
+
+
 data1 = readtable('batch.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
-data2 = readtable('20171124 MagCoord3axisData.csv');
+% #1. old testing data
+% data2 = readtable('20171124 MagCoord3axisData.csv');
+% #2. new collected data
+target_rawdata_paths = getNameFolds('rawdata');
+rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{6}));
+
+%% resample for synchronize
+rate = 2e-2;
+processed_data = resample_rawdata(rawdata,rate);
+
+%% find step point (step) and time labeling
+% threshold should be tuned experimentally to match a person's level 
+minPeakHeight = std(processed_data.acc_norm);       
+[pks,locs] = findpeaks(processed_data.acc_norm,'MinPeakDistance',...
+    .3/rate,'MinPeakHeight',minPeakHeight);   % .3s 이내의 피크는 무시 (가정: 발걸음이 .3초 내에는 2번이뤄지지 않음)\
 
 %%
+addpath(genpath('madgwick_algorithm_matlab'));
+AHRS = MadgwickAHRS('SamplePeriod', rate, 'Beta', 0.1); % sample rate: 2e-2
+
+quaternion = zeros(length(processed_data.Time), 4);
+for t = 1:length(processed_data.Time)
+    AHRS.Update(processed_data.Gyroscope(t,:) * (pi/180), ...
+        processed_data.Accelerometer(t,:), ...
+        processed_data.Accelerometer(t,:));	% gyroscope units must be radians
+    quaternion(t, :) = AHRS.Quaternion;
+end
+
+euler = quatern2euler(quaternConj(quaternion(locs,:)));	% use conjugate for sensor frame relative to Earth and convert to degrees.
+% euler = quatern2euler(quaternConj(quaternion)) * (180/pi);	% use conjugate for sensor frame relative to Earth and convert to degrees.
+rotMat = quatern2rotMat(quaternion(locs,:));
+% std_euler = stdfilt(deg2rad(unwrap(euler(:,3))));
+% plot(processed_data.Time, std_euler)
+
+%% inbound & outbound
+layout = loadjson('N1-7F-HiRes2.json');
+
+x = layout.in(:,1);
+y = layout.in(:,2);
+shp = polyshape(x,y);
+for i = 1:length(layout.out)
+    ox = layout.out{i}(:,1);
+    oy = layout.out{i}(:,2);
+    shp = subtract(shp,polyshape(ox,oy));
+end
+
 A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
 
 xWorldLimits = [-1 1650/20];
@@ -19,16 +68,18 @@ plot(data1.x,data1.y,'.','MarkerSize', 10)
 % for save eps
 legend('reference point')
 sdf(gcf,'sj2')
-print -depsc2 env_setting.eps
+% print -depsc2 env_setting.eps
 
 % axis equal
 % xlim([8 83])
 % ylim([0 30])
 % set(gcf,'units','points','position',[700,500,1500,700])
+plot(shp,'FaceAlpha',.5,'EdgeColor','r')
+
 
 %%
 % initialize particle
-n = 1000;
+n = 2000;
 % 1. only road
 rand_idx = randi(length(data1.x),n,1);
 ps.x = data1.x(rand_idx);
@@ -53,31 +104,30 @@ hold on
 % h_ps = plot(ps.x,ps.y,'.','MarkerSize',8);
 h_ps = scatter(ps.x,ps.y,20,'c','filled','MarkerFaceAlpha',.2);
 h_pm = plot(mean(ps.x),mean(ps.y),'ms');
-h_gt = plot(data2.coord_x(1),data2.coord_y(1),'s','MarkerSize',10,...
-    'MarkerEdgeColor','b',...
-    'MarkerFaceColor',[0.5,0.5,0.5]);
+% h_gt = plot(data2.coord_x(1),data2.coord_y(1),'s','MarkerSize',10,...
+%     'MarkerEdgeColor','b',...
+%     'MarkerFaceColor',[0.5,0.5,0.5]);
 hold off
 
 
 % test data matrix
-tM = [data2.mag_x,data2.mag_y,data2.mag_z];
-% rotate test data because data collected with rotated attitude (yaw)
-x = -pi/2;
-% x = 0;
-
+% tM = [data2.mag_x,data2.mag_y,data2.mag_z];
+% rotate test data 
+% x = -pi/2;
+x = 0;
 R = [cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1];
+
 % tM = (R*tM')';
-tM = (R*tM')'-25;
+% tM = (R*tM')'-25;
 % 25 offset meaning TestData shift: because magnetometer's calibration not matched
+tM = processed_data.Magnetometer(locs,:);
 
 % test result matrix
 est = zeros(length(tM),3);
 err = zeros(length(tM),n);
-
-% Video save
-video_flag = false;
+%%
 if video_flag
-    v = VideoWriter('m3axis_2d_pf_nonshiftedinput.mp4','MPEG-4');
+    v = VideoWriter(strcat('movie_files/',video_filename,'.mp4'),'MPEG-4');
     v.FrameRate = 10;
     v.Quality = 100;
     open(v);
@@ -91,17 +141,21 @@ for i = 1:length(tM)
 %     ps.y = bsxfun(@(x,y) x + sin(y),ps.y,ps.phy_heading);
 %     ps.x = ps.x + cos(ps.mag_heading-pi/2);     % when heading shifted input date
 %     ps.y = ps.y + sin(ps.mag_heading-pi/2);
-    ps.x = ps.x + cos(ps.mag_heading);
-    ps.y = ps.y + sin(ps.mag_heading);
+    sl = .7;
+%     ps.mag_heading = ps.mag_heading+euler(i,3);
+    ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl;
+    ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl;
 %     ps.x = ps.x + ps.stlng.*cos(ps.heading);
 %     ps.y = ps.y + ps.stlng.*sin(ps.heading);
     
-    % ================ UPDATE
-    
+    % ================ UPDATE    
     % 1. find (geo-locational) nearest learning data
     [phy_dist,I] = pdist2([data1.x,data1.y],[ps.x,ps.y],'euclidean','Smallest',1);
-    % 2. calculate magnetic distance
-    R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),-ps.mag_heading,'UniformOutput',false);
+    % 2. calculate Rotated magnetic field data and magnetic distance
+    R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),-ps.mag_heading,...
+        'UniformOutput',false);
+%     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),0,...
+%         'UniformOutput',false);
     rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
     % TODO: may be more optimizable (DONE?maybe)
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
@@ -112,7 +166,8 @@ for i = 1:length(tM)
         break
     end
     ps.prob = 1./(mag_dist);
-    ps.prob(phy_dist>1) = 0;
+    in = isinterior(shp,ps.x,ps.y);
+    ps.prob(~in) = 0;
     if sum(ps.prob) == 0
         rand_idx = randi(length(data1.x),n,1);
         ps.x = data1.x(rand_idx);
@@ -123,14 +178,13 @@ for i = 1:length(tM)
     else
         ps.prob = ps.prob./sum(ps.prob);
     end
-    
-    
-    % ================ resample
+        
+    % ================ RESAMPLE
     resample_idx = randsample(1:n,n,true,ps.prob);
     phy_move_noise_range = 2;
     ps.x = ps.x(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
     ps.y = ps.y(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
-    ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,.001,n,1);
+    ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,.005,n,1);
 %     ps.phy_heading = ps.phy_heading(resample_idx)+random('normal',0,.001,n,1);
 
 %     ps.heading = ps.heading(resample_idx)+random('Uniform', -pi/10,pi/10,n,1);
@@ -139,7 +193,7 @@ for i = 1:length(tM)
    
     set(h_ps,'XData',ps.x,'YData',ps.y)                             % ps result
     set(h_pm,'XData',mean(ps.x),'YData',mean(ps.y));
-    set(h_gt,'XData',data2.coord_x(i),'YData',data2.coord_y(i))     % ground truth
+%     set(h_gt,'XData',data2.coord_x(i),'YData',data2.coord_y(i))     % ground truth
     drawnow
     
 %     est(i,:) = [mean(ps.x),mean(ps.y),mean(angdiff(ps.mag_heading,0))];
