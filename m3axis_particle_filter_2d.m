@@ -9,7 +9,7 @@ mag4 = readtable('db_20171020_15_51_04/magnetic.csv');
 lM = [smooth(mag2.x,10), smooth(mag2.y,10), smooth(mag2.z,10)];
 tM = [smooth(mag4.x,10),smooth(mag4.y,10),-smooth(mag4.z,10)];
 
-n = 400;
+n = 500;
 x = random('Uniform', 1,length(lM),n,1);
 ps = [x,ones(n,1)*(1/n), randi([0 1], n,1)];
 % (DATA INFO) ps: [location, probability, heading]

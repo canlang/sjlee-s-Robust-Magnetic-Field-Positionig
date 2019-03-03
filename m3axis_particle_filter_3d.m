@@ -9,22 +9,31 @@ A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
 xWorldLimits = [-1 1650/20];
 yWorldLimits = [-1 660/20];
 RA = imref2d(size(A),xWorldLimits,yWorldLimits);
-imshow(flipud(A),RA);
-axis xy;
+% imshow(flipud(A),RA);
+axis image tight;
 
 
 % draw learning data
 hold on
-plot(data1.x,data1.y,'.','MarkerSize', 10)
+% plot(data1.x,data1.y,'.')
+scatter(data1.x,data1.y,'o','MarkerEdgeColor','b',...
+    'MarkerFaceColor',[.49 1 .63],'MarkerFaceAlpha',.6)
+xlabel('(m)')
+ylabel('y (m)')
 % for save eps
+
+set(gcf,'units','points','position',[700,500,1000,350])
+tightfig
 legend('reference point')
-sdf(gcf,'sj2')
-print -depsc2 env_setting.eps
+% legend('reference point','location','best')
+sdf(gcf,'sj4')
+print -depsc2 eps/env_setting.eps
 
 % axis equal
 % xlim([8 83])
 % ylim([0 30])
 % set(gcf,'units','points','position',[700,500,1500,700])
+
 %%
 % initialize particle
 n = 1000;

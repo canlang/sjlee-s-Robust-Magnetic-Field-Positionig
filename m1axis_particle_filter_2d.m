@@ -7,12 +7,12 @@ lM = [smooth(mag2.x,10), smooth(mag2.y,10), smooth(mag2.z,10)];
 tM = [smooth(mag4.x,10),smooth(mag4.y,10),-smooth(mag4.z,10)];
 
 % 1-1. input as x component of magnetic field
-lM = lM(:,1);
-tM = abs(tM(:,1));
+% lM = lM(:,1);
+% tM = abs(tM(:,1));
 
 % % 1-2. calculate magnitude value (L2norm)
-% lM = vecnorm(lM')';
-% tM = vecnorm(tM')';
+lM = vecnorm(lM')';
+tM = vecnorm(tM')';
 
 n = 300;
 x = random('Uniform', 1,length(lM),n,1);
@@ -100,9 +100,9 @@ for i = 1:ST:length(tM)
     frame = getframe(gcf);
     writeVideo(v,frame);
     
-    if i >= 10
-        break
-    end
+%     if i >= 10
+%         break
+%     end
 end
 close(v);
 

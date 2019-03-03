@@ -1,17 +1,45 @@
 clear; close all;
 
-% Video save
-video_flag = true;
-video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_3';
+% flag: Video save
+video_flag = false;
+video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_5';
+t_input_idx = 3;
+heading_noise = .000;
 
-
+%%
 data1 = readtable('batch.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
+% INTERPOLATION
+x = data1.x;
+y = data1.y;
+newlM = [];
+for i=1:3
+    z = lM(:,i);
+    XI = min(x):.5:max(x);
+    YI = min(y):.5:max(y);
+    [X,Y] = meshgrid(XI,YI);
+    shp = alphaShape(x,y);
+    in = inShape(shp,X,Y);
+    xg = X(in);
+    yg = Y(in);
+    zg = griddata(x,y,z,xg,yg);         % 2. griddata() : INTERPOLATION
+    if isempty(newlM)
+        newlM = [xg,yg,zg];
+    else
+        newlM = [newlM,zg];
+        if ~isequal(newlM(:,1:2), [xg,yg])
+            disp 'error'
+        end
+    end
+end
+data1 = array2table(newlM(:,1:2), 'VariableNames',{'x','y'});
+lM = newlM(:,3:end);
+%%
 % #1. old testing data
 % data2 = readtable('20171124 MagCoord3axisData.csv');
 % #2. new collected data
 target_rawdata_paths = getNameFolds('rawdata');
-rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{6}));
+rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{t_input_idx}));
 
 %% resample for synchronize
 rate = 2e-2;
@@ -157,16 +185,23 @@ for i = 1:length(tM)
 %     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),0,...
 %         'UniformOutput',false);
     rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
+    
+    % EUCLIDEAN
     % TODO: may be more optimizable (DONE?maybe)
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
     mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
 %     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
+    
+    % COSINE
+%     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
+
 
     if all(mag_dist) == 0
         break
     end
     ps.prob = 1./(mag_dist);
     in = isinterior(shp,ps.x,ps.y);
+%     in = inShape(shp,[ps.x,ps.y]);
     ps.prob(~in) = 0;
     if sum(ps.prob) == 0
         rand_idx = randi(length(data1.x),n,1);
@@ -184,7 +219,7 @@ for i = 1:length(tM)
     phy_move_noise_range = 2;
     ps.x = ps.x(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
     ps.y = ps.y(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
-    ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,.005,n,1);
+    ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,heading_noise,n,1);
 %     ps.phy_heading = ps.phy_heading(resample_idx)+random('normal',0,.001,n,1);
 
 %     ps.heading = ps.heading(resample_idx)+random('Uniform', -pi/10,pi/10,n,1);
@@ -221,64 +256,11 @@ if video_flag close(v);end
 % set(gcf,'units','points','position',[200,500,2000,800])
 % sdf(gcf,'sj2')
 % return
-%%
-close all
-% figure
-figure('Position',[100 100 1000 600])
-subplot(211)
-% [ha,~]=tight_subplot(2,1,[.03 .03],[.1 .01],[.06 .01]);
-% axes(ha(1))
-[lineh, bandsh] = fanChart(1:size(err,1),err, 'mean', 10:10:90, ...
-    'alpha', .2, 'colormap', {'shadesOfColor', [0 0 .8]});
-txt = strcat({'Pct'}, cellstr(int2str((20:20:80)')));
-% legend([bandsh;lineh], [txt;{'Mean'}])
-xlim([0 height(data2)])
-xlabel('Distance in meters')
-ylabel('MAD (m)','Interpreter','tex'); % mean-absolute-deviation
-% ylabel('$|x-\xoverline{x}|$ (m)','Interpreter','latex');
-% set(yl,'Interpreter','latex')
-% set(ha,'YTickLabel','')
-
-err_std = std(err,0,2);
-est_err = sqrt(sum((est(:,1:2)-[data2.coord_x data2.coord_y]).^2,2));
-
-% vh1 = vfill(find(err_std < 2,1),'r','linestyle',':');
-vh1 = vline(find(err_std < 2,1), 'r:', {'\pi/2,12341324123', '\pi'}, [10 0], {'Interpreter', 'tex'});
-vh2 = vfill([find(err_std < 2,1), height(data2)],'g','facealpha',.2,'edgecolor','none','linestyle',':');
-legend([bandsh;lineh;vh1;vh2], [txt;{'Mean';'\sigma_c\leq2 (m)';'Convergence'}])
-
-% clickableLegend([lineh;bandsh], [{'Mean'};txt])
-
-subplot(212)
-% axes(ha(2))
-plot(1:height(data2),err_std,':',...
-    1:height(data2),est_err,'-','MarkerSize',7)
-legend('Standard deviation of particles', 'Positioning error')
-xlim([0 height(data2)])
-xlabel('Distance in meters')
-ylabel("(m)")
-
-
-sdf(gcf,'sj2')
-tightfig(gcf)
- 
-return 
-
-
-%% error ellipse using "gramm"
-g(1,1)=gramm('x',ps.x,'y',ps.y);
-g(1,1).geom_point();
-
-g(1,1).set_point_options('base_size',2);
-g(1,1).stat_ellipse('type','95percentile','geom','area','patch_opts',{'FaceAlpha',0.1,'LineWidth',2});
-g(1,1).set_title('stat_ellispe()');
-
-figure('Position',[100 100 800 600])
-g.draw();
-sdf(gcf,'sj2')
 
 %%
 figure
+err_std = std(err,0,2);
+converge_idx = find(err_std <= 2,1);
 A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
 
 xWorldLimits = [-1 1650/20];
@@ -288,8 +270,17 @@ imshow(flipud(A),RA);
 axis xy;
 
 hold on
-plot(est(:,1), est(:,2),'*r')
+plot(est(1:converge_idx,1), est(1:converge_idx,2),'xr')
+plot(est(converge_idx:end,1), est(converge_idx:end,2),'+b')
+legend('\sigma>2','\sigma\leq2')
+fprintf('Mean Err.=%.2f',est(converge_idx:end,1), est(converge_idx:end,2));
+% cd = [uint8(jet(n)*255) uint8(ones(n,1))].';
+% 
+% drawnow
+% set(p.Edge, 'ColorBinding','interpolated', 'ColorData',cd)
 
+sdf(gcf,'sj')
+return
 %%
 figure
 subplot(211)
