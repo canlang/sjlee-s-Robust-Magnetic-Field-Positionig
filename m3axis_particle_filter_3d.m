@@ -135,8 +135,10 @@ for i = 1:length(tM)
     % ================ resample
     resample_idx = randsample(1:n,n,true,ps.prob);
     phy_move_noise_range = 2;
-    ps.x = ps.x(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
-    ps.y = ps.y(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
+%     ps.x = ps.x(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
+%     ps.y = ps.y(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
+    ps.x = ps.x(resample_idx) + random('normal',0,.5,n,1);
+    ps.y = ps.y(resample_idx) + random('normal',0,.5,n,1);
     ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,.001,n,1);
 %     ps.phy_heading = ps.phy_heading(resample_idx)+random('normal',0,.001,n,1);
 

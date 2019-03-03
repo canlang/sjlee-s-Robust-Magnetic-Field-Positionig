@@ -4,7 +4,8 @@ clear; close all;
 video_flag = false;
 video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_5';
 t_input_idx = 3;
-heading_noise = .000;
+% t_input_idx = 19;
+heading_noise = .50;
 
 %%
 data1 = readtable('batch.csv');
@@ -216,9 +217,11 @@ for i = 1:length(tM)
         
     % ================ RESAMPLE
     resample_idx = randsample(1:n,n,true,ps.prob);
-    phy_move_noise_range = 2;
-    ps.x = ps.x(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
-    ps.y = ps.y(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
+%     phy_move_noise_range = 2;
+%     ps.x = ps.x(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
+%     ps.y = ps.y(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
+    ps.x = ps.x(resample_idx) + random('normal',0,.5,n,1);
+    ps.y = ps.y(resample_idx) + random('normal',0,.5,n,1);
     ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,heading_noise,n,1);
 %     ps.phy_heading = ps.phy_heading(resample_idx)+random('normal',0,.001,n,1);
 

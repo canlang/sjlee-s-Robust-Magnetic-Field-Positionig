@@ -7,12 +7,12 @@ lM = [smooth(mag2.x,10), smooth(mag2.y,10), smooth(mag2.z,10)];
 tM = [smooth(mag4.x,10),smooth(mag4.y,10),-smooth(mag4.z,10)];
 
 % 1-1. input as x component of magnetic field
-% lM = lM(:,1);
-% tM = abs(tM(:,1));
+lM = lM(:,1);
+tM = abs(tM(:,1));
 
 % % 1-2. calculate magnitude value (L2norm)
-lM = vecnorm(lM')';
-tM = vecnorm(tM')';
+% lM = vecnorm(lM')';
+% tM = vecnorm(tM')';
 
 n = 300;
 x = random('Uniform', 1,length(lM),n,1);
@@ -61,7 +61,7 @@ for i = 1:ST:length(tM)
 %             else
 %                 rot = 1;
 %             end
-            D = pdist([tM(j);lM(location(j))]);
+            D = pdist([tM(i);lM(location(j))]);
             prob = 1/D;
 %             prob = 1/abs(rot*tM(j) - lM(location(j)));
             if prob ~= inf
@@ -80,16 +80,22 @@ for i = 1:ST:length(tM)
     end
     ps(:,2) = ps(:,2)/sum(ps(:,2));
     
-    RCON = ps(:,2) <= 0.001;
-    nResample = nnz(RCON);
-    restProb = sum(ps(RCON,2));
-    ps(RCON,:) = [];
-    if nResample > 0
-%         newLoc = random('Uniform', 1,length(mag2.time),nResample,1);
-        newLoc = randsample(ps(:,1),nResample, true, ps(:,2))+50*rand(nResample,1);
-        newPs = [newLoc, restProb*ones(nResample,1), randi([0 1], nResample,1)];        
-        ps = [ps;newPs];
-    end
+    % RESAMPLING v1
+%     RCON = ps(:,2) <= 0.001;
+%     nResample = nnz(RCON);
+%     restProb = sum(ps(RCON,2));
+%     ps(RCON,:) = [];
+%     if nResample > 0
+% %         newLoc = random('Uniform', 1,length(mag2.time),nResample,1);
+%         newLoc = randsample(ps(:,1),nResample, true, ps(:,2))+50*rand(nResample,1);
+%         newPs = [newLoc, restProb*ones(nResample,1), randi([0 1], nResample,1)];        
+%         ps = [ps;newPs];
+%     end
+    
+    % RESAMPLING v2
+    resample_idx = randsample(1:n,n,true,ps(:,2));
+    ps(:,1) = ps(resample_idx,1) + random('normal',0,2,n,1);
+    ps(:,3) = ps(resample_idx,3);
     
     
     set(h_ps,'XData', ps(:,1))
@@ -100,9 +106,9 @@ for i = 1:ST:length(tM)
     frame = getframe(gcf);
     writeVideo(v,frame);
     
-%     if i >= 10
-%         break
-%     end
+    if i >= 5
+        break
+    end
 end
 close(v);
 
