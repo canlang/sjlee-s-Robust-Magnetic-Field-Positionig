@@ -1,11 +1,17 @@
 clear; close all;
 
 % flag: Video save
-video_flag = false;
-video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_5';
-t_input_idx = 3;
-% t_input_idx = 19;
-heading_noise = .50;
+video_flag = 0;
+% video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_5';%nonshifted input??
+video_filename = 'm3axis_2d-space_pf_real-time-input_loop-traj';
+% success: 3(-),4,6,7,8(loop),9,10,11,12,13(-),14,16,17,18,19
+% failure: 15,32,34,35,36
+% t_input_idx = 10;
+% t_input_idx = 29;
+% t_input_idx = 36;
+t_input_idx = 43;
+% heading_noise = .50;
+heading_noise = .01;
 
 %%
 data1 = readtable('batch.csv');
@@ -23,7 +29,7 @@ for i=1:3
     in = inShape(shp,X,Y);
     xg = X(in);
     yg = Y(in);
-    zg = griddata(x,y,z,xg,yg);         % 2. griddata() : INTERPOLATION
+    zg = griddata(x,y,z,xg,yg,'nearest');         % 2. griddata() : INTERPOLATION
     if isempty(newlM)
         newlM = [xg,yg,zg];
     else
@@ -66,7 +72,10 @@ end
 
 euler = quatern2euler(quaternConj(quaternion(locs,:)));	% use conjugate for sensor frame relative to Earth and convert to degrees.
 % euler = quatern2euler(quaternConj(quaternion)) * (180/pi);	% use conjugate for sensor frame relative to Earth and convert to degrees.
+
 rotMat = quatern2rotMat(quaternion(locs,:));
+% rotMat = quatern2rotMat(quaternConj(quaternion(locs,:)));
+
 % std_euler = stdfilt(deg2rad(unwrap(euler(:,3))));
 % plot(processed_data.Time, std_euler)
 
@@ -94,6 +103,7 @@ axis xy;
 % draw learning data
 hold on
 plot(data1.x,data1.y,'.','MarkerSize', 10)
+% plot(lM(:,1),lM(:,2),'.','MarkerSize', 10)
 % for save eps
 legend('reference point')
 sdf(gcf,'sj2')
@@ -172,8 +182,8 @@ for i = 1:length(tM)
 %     ps.y = ps.y + sin(ps.mag_heading-pi/2);
     sl = .7;
 %     ps.mag_heading = ps.mag_heading+euler(i,3);
-    ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl;
-    ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl;
+    ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
+    ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
 %     ps.x = ps.x + ps.stlng.*cos(ps.heading);
 %     ps.y = ps.y + ps.stlng.*sin(ps.heading);
     
@@ -181,7 +191,7 @@ for i = 1:length(tM)
     % 1. find (geo-locational) nearest learning data
     [phy_dist,I] = pdist2([data1.x,data1.y],[ps.x,ps.y],'euclidean','Smallest',1);
     % 2. calculate Rotated magnetic field data and magnetic distance
-    R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),-ps.mag_heading,...
+    R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),ps.mag_heading,...
         'UniformOutput',false);
 %     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),0,...
 %         'UniformOutput',false);
@@ -204,6 +214,8 @@ for i = 1:length(tM)
     in = isinterior(shp,ps.x,ps.y);
 %     in = inShape(shp,[ps.x,ps.y]);
     ps.prob(~in) = 0;
+    ps.prob(phy_dist'>3) = 0;
+    
     if sum(ps.prob) == 0
         rand_idx = randi(length(data1.x),n,1);
         ps.x = data1.x(rand_idx);
@@ -220,8 +232,11 @@ for i = 1:length(tM)
 %     phy_move_noise_range = 2;
 %     ps.x = ps.x(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
 %     ps.y = ps.y(resample_idx) + phy_move_noise_range*rand(n,1) - phy_move_noise_range/2;
-    ps.x = ps.x(resample_idx) + random('normal',0,.5,n,1);
-    ps.y = ps.y(resample_idx) + random('normal',0,.5,n,1);
+%     ps.x = ps.x(resample_idx) + random('normal',0,.5,n,1);
+%     ps.y = ps.y(resample_idx) + random('normal',0,.5,n,1);
+    ps.x = ps.x(resample_idx);
+    ps.y = ps.y(resample_idx);
+    
     ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,heading_noise,n,1);
 %     ps.phy_heading = ps.phy_heading(resample_idx)+random('normal',0,.001,n,1);
 
@@ -264,26 +279,64 @@ if video_flag close(v);end
 figure
 err_std = std(err,0,2);
 converge_idx = find(err_std <= 2,1);
-A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
+% A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
+% 
+% xWorldLimits = [-1 1650/20];
+% yWorldLimits = [-1 660/20];
+% RA = imref2d(size(A),xWorldLimits,yWorldLimits);
+% imshow(flipud(A),RA);
+% axis xy;
 
-xWorldLimits = [-1 1650/20];
-yWorldLimits = [-1 660/20];
-RA = imref2d(size(A),xWorldLimits,yWorldLimits);
-imshow(flipud(A),RA);
-axis xy;
+% axis equal
 
 hold on
 plot(est(1:converge_idx,1), est(1:converge_idx,2),'xr')
 plot(est(converge_idx:end,1), est(converge_idx:end,2),'+b')
 legend('\sigma>2','\sigma\leq2')
-fprintf('Mean Err.=%.2f',est(converge_idx:end,1), est(converge_idx:end,2));
+% fprintf('Mean Err.=%.2f\n',est(converge_idx:end,1), est(converge_idx:end,2));
 % cd = [uint8(jet(n)*255) uint8(ones(n,1))].';
 % 
 % drawnow
 % set(p.Edge, 'ColorBinding','interpolated', 'ColorData',cd)
 
 sdf(gcf,'sj')
+print -depsc2 eps/18times_repeat_circle.eps
 return
+%%
+close all
+err_std = std(err,0,2);
+converge_idx = find(err_std <= 2,1);
+
+axis equal
+
+est2(:,1) = est(:,1)-12;
+est2(:,2) = est(:,2)-21;
+
+
+hold on
+plot(est2(1:converge_idx,1), est2(1:converge_idx,2),'xr')
+plot(est2(converge_idx:end,1), est2(converge_idx:end,2),'+b')
+legend('\sigma>2','\sigma\leq2')
+hold off
+% set(gca,'xticklabel',[])
+% set(gca,'yticklabel',[])
+% xticks('auto')
+% yticks('auto')
+pbaspect([1 1 1])
+grid on
+grid minor
+% set(gca,'xtick',[])
+% set(gca,'ytick',[])
+xlabel('x (m)');
+ylabel('y (m)');
+xlim([0.6900   34.1538]);
+ylim([-15.0702   10.5512]);
+
+set(gcf,'units','points','position',[500,500,800,600])
+sdf(gcf,'sj2')
+print -depsc2 eps/18times_repeat_circle_raw.eps
+return
+
 %%
 figure
 subplot(211)

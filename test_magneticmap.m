@@ -1,4 +1,6 @@
 clear; close all;
+addpath('xyz file operations')
+
 data1 = readtable('batch.csv');
 
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];

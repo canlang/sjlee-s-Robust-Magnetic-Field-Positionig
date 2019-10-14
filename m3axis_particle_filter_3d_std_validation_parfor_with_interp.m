@@ -4,13 +4,14 @@ data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 % INTERPOLATION
+interp_interval = .7;
 x = data1.x;
 y = data1.y;
 newlM = [];
 for i=1:3
     z = lM(:,i);
-    XI = min(x):1.2:max(x);
-    YI = min(y):1.2:max(y);
+    XI = min(x):interp_interval:max(x);
+    YI = min(y):interp_interval:max(y);
     [X,Y] = meshgrid(XI,YI);
     shp = alphaShape(x,y);
     in = inShape(shp,X,Y);
@@ -95,7 +96,7 @@ for k = 1:length(nParticleCandidate)
             % 1. find (geo-locational) nearest learning data
             [phy_dist,I] = pdist2([data1.x,data1.y],[ps_x,ps_y],'euclidean','Smallest',1);
             % 2. calculate magnetic distance
-            R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),-ps_mag_heading,'UniformOutput',false);
+            R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps_mag_heading,'UniformOutput',false);
             rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
             % TODO: may be more optimizable (DONE?maybe)
         %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));

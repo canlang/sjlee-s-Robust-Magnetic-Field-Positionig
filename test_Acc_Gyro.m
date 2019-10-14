@@ -1,7 +1,8 @@
 clear;close all;clc;
 
 target_rawdata_paths = getNameFolds('rawdata');
-rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{9}));
+rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{43})); 
+% index 9 also available
 
 % rawdata = load_rawdata('181217_170914_656_N1_긴복도_동쪽방향');
 % rawdata = load_rawdata('181217_171014_406_N1_긴복도_서쪽방향');
@@ -64,7 +65,8 @@ estloc = zeros(length(locs),2);
 for i=1:length(locs)
 % for i=1:length(estloc)
     t_i = locs(i);
-    yaw = euler(t_i,3)+180;
+    yaw = euler(t_i,3);
+%     yaw = euler(t_i,3)+90;
     step = 0.7;
     trM = [step*(1*cosd(yaw) - 0*sind(yaw));step*(1*sind(yaw) + 0*cosd(yaw))];
 %     trM = [step*(0*cosd(yaw) - 1*sind(yaw));step*(0*sind(yaw) + 1*cosd(yaw))];
@@ -76,33 +78,38 @@ for i=1:length(locs)
 end
 
 %% draw v.02
+close all
 figure
-
-subplot(221)
+subplot(211)
 yaw = unwrap((euler(:,3)));
 % s_yaw = smoothdata(yaw,'movmedian',0);
 plot(time, deg2rad(yaw))
-xlabel('time');ylabel('Yaw (rad)')
+xlabel('time (sec)');ylabel('\psi (rad)')
 % title('time to yaw (rad)')
-subplot(223)
-plot(time, stdfilt(deg2rad(yaw)))
-xlabel('time');ylabel('\sigma of Yaw (rad)')
+subplot(212)
+plot(time, stdfilt(deg2rad(yaw)),'.')
+xlabel('time (sec)');ylabel('\sigma of \psi (rad)')
 % title('time to std (yaw)')
 % plot((euler(:,3)))
+set(gcf,'units','points','position',[500,500,800,500])
+sdf(gcf,'sj2')
 
-subplot(3,2,2:2:4)
+figure
+% subplot(3,2,2:2:4)
 plot(estloc(:,1),estloc(:,2),'xr-','MarkerSize',8)
-xlabel('m');
-ylabel('m');
+xlabel('x (m)');
+ylabel('y (m)');
 % ylim([-10 50])
 axis image
 % axis 'auto'
 grid on
+grid minor
 
-set(gcf,'units','points','position',[500,500,1200,800])
-% sdf(gcf,'sj2')
+set(gcf,'units','points','position',[500,500,800,600])
+sdf(gcf,'sj2')
 
 print -clipboard -dbitmap
+print -depsc2 eps/18times_repeat_circle_pdr.eps
 return
 %% draw v.01
 figure
@@ -131,7 +138,7 @@ axis image
 grid on
 
 set(gcf,'units','points','position',[500,500,1200,800])
-% sdf(gcf,'sj2')
+sdf(gcf,'sj2')
 
 print -clipboard -dbitmap
 %% local functions

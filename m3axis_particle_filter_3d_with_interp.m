@@ -9,14 +9,14 @@ y = data1.y;
 newlM = [];
 for i=1:3
     z = lM(:,i);
-    XI = min(x):.7:max(x);
-    YI = min(y):.7:max(y);
+    XI = min(x):.6:max(x);
+    YI = min(y):.6:max(y);
     [X,Y] = meshgrid(XI,YI);
     shp = alphaShape(x,y);
     in = inShape(shp,X,Y);
     xg = X(in);
     yg = Y(in);
-    zg = griddata(x,y,z,xg,yg);         % 2. griddata() : INTERPOLATION
+    zg = griddata(x,y,z,xg,yg,'v4');         % 2. griddata() : INTERPOLATION
     if isempty(newlM)
         newlM = [xg,yg,zg];
     else
@@ -41,11 +41,14 @@ axis xy;
 
 % draw learning data
 hold on
-plot(data1.x,data1.y,'.','MarkerSize', 10)
+% plot(data1.x,data1.y,'.')
+plot(data1.x,data1.y,'r.','MarkerSize', 10)
 % for save eps
 legend('reference point')
-sdf(gcf,'sj2')
-print -depsc2 env_setting.eps
+set(gca,'XTick',[]);
+set(gca,'YTick',[]);
+sdf(gcf,'sj4')
+print -depsc2 eps/interpolated_env.eps
 
 % axis equal
 % xlim([8 83])

@@ -18,8 +18,11 @@ hold on
 plot(data1.x,data1.y,'.','MarkerSize', 10)
 % for save eps
 legend('reference point')
-sdf(gcf,'sj2')
-print -depsc2 env_setting.eps
+set(gca,'XTick',[]);
+set(gca,'YTick',[]);
+sdf(gcf,'sj4')
+print -depsc2 eps/env_setting.eps
+% export_fig eps/env_setting.eps -depsc -m2
 
 % axis equal
 % xlim([8 83])

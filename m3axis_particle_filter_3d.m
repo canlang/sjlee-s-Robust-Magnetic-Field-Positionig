@@ -36,7 +36,7 @@ print -depsc2 eps/env_setting.eps
 
 %%
 % initialize particle
-n = 1000;
+n = 2000;
 % 1. only road
 rand_idx = randi(length(data1.x),n,1);
 ps.x = data1.x(rand_idx);
@@ -55,6 +55,7 @@ ps.mag_heading = random('Uniform', 0,2*pi,n,1);
 ps.phy_heading = random('Uniform', 0,2*pi,n,1);
 ps.prob = ones(n,1)*(1/n);
 % ps.stlng = ones(n,1) + random('Uniform', -.1,.1,n,1);
+
 
 % draw particle
 hold on 
@@ -108,7 +109,7 @@ for i = 1:length(tM)
     % 1. find (geo-locational) nearest learning data
     [phy_dist,I] = pdist2([data1.x,data1.y],[ps.x,ps.y],'euclidean','Smallest',1);
     % 2. calculate magnetic distance
-    R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),-ps.mag_heading,'UniformOutput',false);
+    R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps.mag_heading,'UniformOutput',false);
     rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
     % TODO: may be more optimizable (DONE?maybe)
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
@@ -161,6 +162,7 @@ for i = 1:length(tM)
         frame = getframe(gcf);
         writeVideo(v,frame);
     end
+    ps_hist(i) = ps;
 end
 if video_flag close(v);end
 %%
@@ -172,7 +174,15 @@ legend([bandsh;lineh], [txt;{'Mean'}])
 % clickableLegend([lineh;bandsh], [{'Mean'};txt])
 
 return 
-
+%% visualize magnetic heading (temporal, not completed)
+% mean_mag_heading = [];
+% for i = 1:length(ps_hist)
+%     ps = ps_hist(i);
+%     mean_mag_heading(end+1) = mean(ps.mag_heading);
+% end
+% PC1 = 1.*cos(mean_mag_heading)+pi/2);
+% PC2 = 1.*sin(mean_mag_heading)+pi/2);
+% s_plot = scatter3(ps.x,PC1(:),PC2(:),100,ps.mag_heading,'filled');
 
 %% error ellipse using "gramm"
 g(1,1)=gramm('x',ps.x,'y',ps.y);

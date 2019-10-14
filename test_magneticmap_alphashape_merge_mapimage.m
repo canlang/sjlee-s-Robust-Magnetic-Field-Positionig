@@ -18,10 +18,18 @@ A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
 xWorldLimits = [-1 1650/20];
 yWorldLimits = [-1 660/20];
 RA = imref2d(size(A),xWorldLimits,yWorldLimits);
-% imshow(flipud(A),RA);
+imshow(flipud(A),RA);
+% axis image
+axis xy
 
 hold on
+
+
 [X,Y,Z] = interpolation_by_alphashape(x,y,z);
+set(gca,'XTick',[]);
+set(gca,'YTick',[]);
+sdf(gcf,'sj4')
+print -depsc2 eps/alphashape.eps
 
 % h = imagesc(X(1,:),Y(:,1),Z);
 % xlabel('x (m)')
@@ -44,16 +52,15 @@ hold on
 
 
 %% ----------------------------------------------------
-xlabel('(m)')
-ylabel('y (m)')
-axis image
-axis xy
+% xlabel('x (m)')
+% ylabel('y (m)')
 
-set(gcf,'units','points','position',[700,500,1000,350])
-tightfig
-legend('alphashape')
+
+% set(gcf,'units','points','position',[700,500,1000,350])
+% tightfig
+
 % set(gcf,'units','points','position',[500,500,1200,600])
-sdf(gcf,'sj4')
+
 
 %% ----------------------------------------------------
 % saveas(gcf,'eps/interp_norm.eps','epsc');
@@ -61,8 +68,7 @@ sdf(gcf,'sj4')
 % saveas(gcf,'eps/interp_y.eps','epsc');
 % saveas(gcf,'eps/interp_z.eps','epsc');
 % saveas(gcf,'eps/alphashape.eps','epsc');
-print -depsc2 eps/alphashape.eps
-% export_fig eps/alphashape.eps -depsc -m2.5
+% export_fig eps/alphashape.eps -depsc -m2
 %% INTERPOLATION by alphashape
 function [X,Y,Z] = interpolation_by_alphashape(x,y,z)
 XI = min(x):.5:max(x);
@@ -71,9 +77,13 @@ YI = min(y):.5:max(y);
 
 % APPLY ALPHA SHAPE 
 shp = alphaShape(x,y);
-% plot(shp,'FaceAlpha',0.5,'EdgeAlpha',0.3,'LineWidth',0.3)
-plot(shp,'FaceColor','red','FaceAlpha',0.3,'LineWidth',0.3)
-% 'FaceColor','red',
+plot(shp,'EdgeColor','k')
+% plot(shp,'FaceAlpha',0.7,'EdgeAlpha',.7,'LineWidth',0.3)
+% plot(shp,'FaceColor','red','FaceAlpha',0.3,'LineWidth',0.3)
+% polyin = polyshape(shp.Points(:,1),shp.Points(:,2));
+% plot(polyin)
+
+legend('alphashape')
 
 % hline = findobj(gcf, 'type', 'line');
 % set(hline(1),'LineStyle','--')
