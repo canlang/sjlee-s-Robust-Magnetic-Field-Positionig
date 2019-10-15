@@ -302,7 +302,7 @@ legend('\sigma>2','\sigma\leq2')
 sdf(gcf,'sj')
 print -depsc2 eps/18times_repeat_circle.eps
 return
-%%
+%% for papaer figure (without map image)
 close all
 err_std = std(err,0,2);
 converge_idx = find(err_std <= 2,1);
