@@ -182,7 +182,7 @@ subplot(211)
 txt = strcat({'Pct'}, cellstr(int2str((20:20:80)')));
 % legend([bandsh;lineh], [txt;{'Mean'}])
 xlim([0 height(data2)])
-xlabel('Distance in meters')
+xlabel('Step (m)')
 ylabel('MAD (m)','Interpreter','tex'); % mean-absolute-deviation
 % ylabel('$|x-\xoverline{x}|$ (m)','Interpreter','latex');
 % set(yl,'Interpreter','latex')
@@ -200,17 +200,19 @@ legend([bandsh;lineh;vh1;vh2], [txt;{'Mean';'\sigma_c\leq2 (m)';'Convergence'}])
 
 subplot(212)
 % axes(ha(2))
-plot(1:height(data2),err_std,':',...
-    1:height(data2),est_err,'-','MarkerSize',7)
-legend('Standard deviation of particles', 'Positioning error')
+plot(1:height(data2),est_err,'-',...
+    1:height(data2),err_std,':','MarkerSize',7)
+vh1 = vline(find(err_std < 2,1), 'r:', {'\pi/2,12341324123', '\pi'}, [10 0], {'Interpreter', 'tex'});
+vh2 = vfill([find(err_std < 2,1), height(data2)],'g','facealpha',.2,'edgecolor','none','linestyle',':');
+legend('\mu','\sigma_{AD}')
 xlim([0 height(data2)])
-xlabel('Distance in meters')
-ylabel("(m)")
+xlabel('Step (m)')
+ylabel("Error (m)")
 
 
 sdf(gcf,'sj2')
 tightfig(gcf)
- 
+print -depsc2 eps/fanchart-success.eps
 return 
 
 

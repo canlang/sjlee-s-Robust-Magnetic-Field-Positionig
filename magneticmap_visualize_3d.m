@@ -66,7 +66,7 @@ sdf(gcf,'sj2')
 % colorbar
 % F = scatteredInterpolant(data1.magnet_x,data1.magnet_y,data1.magnet_z,'nearest');
 % vq = F(X,Y);
-
+return
 %%
 h = contourf(X,Y,Z);
 hcb = colorbar;

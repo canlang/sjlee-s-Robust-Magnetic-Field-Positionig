@@ -6,7 +6,7 @@ lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 % data2 = readtable('20171124 MagCoord3axisData.csv');
 target_rawdata_paths = getNameFolds('rawdata');
 rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{1}));
-trace_info = regexp(target_rawdata_paths{j},'_','split');
+% trace_info = regexp(target_rawdata_paths{j},'_','split');
 
 %%
 % nParticleCandidate = 500:500:3000;
