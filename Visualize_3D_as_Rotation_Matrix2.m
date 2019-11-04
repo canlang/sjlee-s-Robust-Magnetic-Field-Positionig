@@ -1,0 +1,240 @@
+clear; close all;
+data1 = readtable('batch.csv');         % as Learning
+data2 = readtable('20171124 MagCoord3axisData.csv');        % as Testing 
+
+% mag2 = readtable('db_20171020_15_48_22/magnetic.csv');
+% mag4 = readtable('db_20171020_15_51_04/magnetic.csv');
+% 
+% lM = [smooth(mag2.x,10), smooth(mag2.y,10), smooth(mag2.z,10)];
+% tM = [smooth(mag4.x,10),smooth(mag4.y,10),-smooth(mag4.z,10)];
+%%
+% ---------------------------------------------
+% idx = 1:195;
+idx = 1:length(data1.y);
+yMin = min(data1.y(idx));
+yMax = max(data1.y(idx));
+% lM = data1(data1.y>=yMin,:);
+lM = table2array(data1(data1.y==21.1,:));       % Pick a line
+sortedlM = sortrows(lM,1);
+% ---------------------------------------------
+tM = [data2.mag_x,data2.mag_y,data2.mag_z];
+% agl = -pi/2;
+% agl = 0.1363;
+% R = [cos(agl) -sin(agl) 0 ;
+%     sin(agl) cos(agl) 0;
+%     0 0 1];
+% rotlM = (R*tM')';
+
+
+% x = 5; % data's optimal value
+x = -pi/2;
+R = [cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1];
+tM = (R*tM')'-25;
+
+
+x1 = lM(:,1);
+x2 = data2.coord_x;
+
+mx1 = lM(:,3);
+my1 = lM(:,4);
+mz1 = lM(:,5);
+
+mx2 = tM(:,1);
+my2 = tM(:,2);
+mz2 = tM(:,3);
+
+subplot(411)
+plot(x1,mx1,'s-', x2,mx2,'s-')
+legend('Learning data', 'Test data')
+title('Comparison of x magnet data')
+subplot(412)
+plot(x1,my1,'s-', x2,my2,'s-')
+legend('Learning data', 'Test data')
+title('Comparison of y magnet data')
+subplot(413)
+plot(x1,mz1,'s-', x2,mz2,'s-')
+legend('Learning data', 'Test data')
+title('Comparison of z magnet data')
+subplot(414)
+plot(x1,vecnorm([mx1 my1 mz1],2,2),'s-', x2,vecnorm([mx2 my2 mz2],2,2),'s-')
+legend('Learning data', 'Test data')
+title('Comparison of L2Norm magnet data')
+
+set(gcf,'units','points','position',[400,200,1000,800])
+sdf(gcf','sj')
+
+%% interpolation tick (= data2 size, why? was it just my opinion?)
+radian_x = linspace(-pi,pi,200);
+%% --------------------------------------------- Calculate Data for 2D plot
+close all
+figure
+R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),(radian_x)','UniformOutput',false);
+rotatedMag = cell2mat(cellfun(@(x)((x*tM(1,:)')'),R,'UniformOutput',false));
+mag_dist = pdist([lM(1,3:5);rotatedMag]);
+mag_dist = mag_dist(1:length(R));
+
+plot(radian_x,1./mag_dist)
+set(gca,'XTick',-pi:pi/2:pi) 
+set(gca,'XTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi'}) 
+set(gcf,'units','points','position',[800,500,1000,500])
+sdf(gcf','sj')
+% [~,I] = min(mag_dist);
+% radian_x(I)
+
+%% --------------------------------------------- Calculate Data for 3D plot
+% close all
+
+[X,Y] = meshgrid(x2, radian_x);
+% [X,Y] = meshgrid(radian_x,x2);
+Z = arrayfun(@(x,y) 1/getDistance(x,[data2.coord_x,data2.coord_y,tM],lM,y),X,Y);
+% R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),Y,'UniformOutput',false);
+% rotatedMag = cell2mat(cellfun(@(x,y)((y*tM(x,:)')'),mat2cell(X),R,'UniformOutput',false));
+%% visualize 2D multiple histogram
+close all
+figure
+
+norm_Z2 = normalize(Z,'range');
+for i = 1:size(Z,2)  %size(Z,2)
+% %     norm_Z2(:,i) = norm_Z2(:,i)/sum(norm_Z2(:,i));
+% %     plot(radian_x,norm_Z2(:,i))
+%     PC_x = (1+norm_Z2(:,i)).*cos(radian_x+pi/2)';
+%     PC_y = (1+norm_Z2(:,i)).*sin(radian_x+pi/2)';
+%     plot(PC_x,PC_y)
+%     polarplot(radian_x,1+norm_Z2(:,i))   
+%     hold on
+end
+hold off
+% 
+
+
+% close all
+% figure 
+% PC_x = (1+norm_Z2(:,13)).*cos(radian_x+pi/2)';
+% PC_y = (1+norm_Z2(:,13)).*sin(radian_x+pi/2)';
+% plot(PC_x,PC_y)
+polarplot(radian_x,1+norm_Z2(:,1),'b')
+hold on
+polarplot([0,0],[0 2],'r-')
+[v,i]= max(norm_Z2(:,1));
+polarplot([radian_x(i),radian_x(i)],[0 2],'g-')
+pax = gca;
+pax.ThetaZeroLocation = 'top';
+pax.ThetaColor = 'blue';
+
+% axis equal
+% 
+% set(gca,'XTick',-pi:pi/2:pi) 
+% set(gca,'XTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi'}) 
+% set(gcf,'units','points','position',[800,500,1000,500])
+sdf(gcf','sj2')
+print -depsc2 eps/rotation_similarity_3d_3.eps
+
+%%
+% --- DRAWING 3D surf
+figure
+
+% norm_Z = smoothn(Z,'robust');
+% s = surf(X,Y,norm_Z,'FaceAlpha',0.5);
+% s = surf(X,Y,Z,'FaceAlpha',0.5);
+
+% m_plot = fill3(X,cos(Y),sin(Y),X,'FaceAlpha',0.5);
+m_plot = surf(X,cos(Y),sin(Y),X,'FaceAlpha',0.5);
+shading flat
+% m_plot.EdgeColor = 'none';    
+hold on
+
+% s = surf(X,(1+normalize(Z,'scale')).*cos(Y+pi/2),(1+normalize(Z,'scale')).*sin(Y+pi/2));
+norm_Z2 = normalize(Z,'range');
+PC1 = (1+norm_Z2).*cos(Y+pi/2);
+PC2 = (1+norm_Z2).*sin(Y+pi/2);
+% PC1 = (1).*cos(Y+pi/2);
+% PC2 = (1).*sin(Y+pi/2);
+s_plot = surf(X,PC1,PC2,normalize(Z,'range'),'FaceAlpha',0.8);
+% s_plot.EdgeColor = 'none';    
+% s_plot = scatter3(X(:),PC1(:),PC2(:),100,norm_Z2(:),'filled');
+% s_plot.MarkerFaceAlpha = rand(1);
+
+% shading flat
+% lighting flat
+hidden off
+
+xlabel('(m)')
+set(gca,'YTickLabel',[])
+set(gca,'ZTickLabel',[])
+
+% x_ = X(:);
+% y_ = cos(Y(:));
+% z_ = sin(Y(:));
+% s = scatter3(x_,y_,z_,10,Z(:));
+grid on
+daspect([10 1 1])
+
+xlim
+
+% xlabel('Location (m)')
+% ylabel('\nabla\psi (rad) ')
+% zlabel('Similarity')
+
+% view(20.9000,57.2000)
+% view(32.2860,62.5660)
+% view(48.5260,82.4516)
+% view(.5,90)
+% view(-61,19)
+% view(-90,8.53)
+view(-90,0)
+
+% set(gca,'YTick',-pi:pi/2:pi) 
+% set(gca,'YTickLabel',{'-\pi','-\pi/2',0,'\pi/2','\pi'}) 
+
+set(gcf,'units','points','position',[500,500,800,800])
+sdf(gcf','sj2')
+
+
+hold on
+plot3([X(1)-5 X(end)+5],[cos(pi/2), cos(pi/2)],[sin(pi/2), sin(pi/2)],...
+    'r-','LineWidth',2);
+hold off
+
+% tightfig(gcf);
+% s.EdgeColor = 'none';
+% colormap(flipud(spring))
+% colormap hot
+% caxis([20 200])
+% colorbar
+% colormap(parula(5))
+%% 
+print -depsc2 eps/rotation_similarity_3d_1.eps
+%%
+[~,max_similar_I] = max(Z);
+plot(rad2deg(radian_x(max_similar_I)),'o-')
+yticks([-90 0 90])
+ylabel(['Error (',char(176),')'])
+ylim([-90,90])
+b1 = (1:63)'\rad2deg(radian_x(max_similar_I))';
+% linear regression
+yCalc1 = b1*(1:63);
+hold on
+plot(1:63,yCalc1, '--')
+grid on
+hold off
+set(gcf,'units','points','position',[500,500,800,300])
+sdf(gcf','sj2')
+%%
+% VISUAL EFFECT
+% light;
+% lighting phong;
+% camlight('left');
+% shading interp;
+%%
+function d = getDistance(x,tdata,ldata,rot_angle)
+l_x = interp1(ldata(:,1),ldata(:,3),x);
+l_y = interp1(ldata(:,1),ldata(:,4),x);
+l_z = interp1(ldata(:,1),ldata(:,5),x);
+t_x = interp1(tdata(:,1),tdata(:,3),x);
+t_y = interp1(tdata(:,1),tdata(:,4),x);
+t_z = interp1(tdata(:,1),tdata(:,5),x);
+rotMat = @(x) ([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]); 
+d = pdist([l_x,l_y,l_z;(rotMat(rot_angle)*[t_x;t_y;t_z])']);
+end
+
+
