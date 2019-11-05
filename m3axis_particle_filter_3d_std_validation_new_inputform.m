@@ -76,6 +76,7 @@ euler = quatern2euler(quaternConj(quaternion(locs,:)));	% use conjugate for sens
 rotMat = quatern2rotMat(quaternion(locs,:));
 % rotMat = quatern2rotMat(quaternConj(quaternion(locs,:)));
 
+std_euler = stdfilt(unwrap(euler(:,3)));
 % std_euler = stdfilt(deg2rad(unwrap(euler(:,3))));
 % plot(processed_data.Time, std_euler)
 
@@ -237,7 +238,8 @@ for i = 1:length(tM)
     ps.x = ps.x(resample_idx);
     ps.y = ps.y(resample_idx);
     
-    ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,heading_noise,n,1);
+    ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,std_euler(i),n,1);
+%     ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,heading_noise,n,1);    
 %     ps.phy_heading = ps.phy_heading(resample_idx)+random('normal',0,.001,n,1);
 
 %     ps.heading = ps.heading(resample_idx)+random('Uniform', -pi/10,pi/10,n,1);
