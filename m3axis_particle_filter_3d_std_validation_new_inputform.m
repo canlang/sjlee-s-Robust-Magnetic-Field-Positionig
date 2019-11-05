@@ -238,7 +238,9 @@ for i = 1:length(tM)
     ps.x = ps.x(resample_idx);
     ps.y = ps.y(resample_idx);
     
-    ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,std_euler(i),n,1);
+    if std_euler(i) > 0.03
+        ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,std_euler(i),n,1);
+    end
 %     ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,heading_noise,n,1);    
 %     ps.phy_heading = ps.phy_heading(resample_idx)+random('normal',0,.001,n,1);
 
