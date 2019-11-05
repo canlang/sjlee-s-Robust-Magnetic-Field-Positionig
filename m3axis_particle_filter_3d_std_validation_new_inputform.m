@@ -3,13 +3,13 @@ clear; close all;
 % flag: Video save
 video_flag = 0;
 % video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_5';%nonshifted input??
-video_filename = 'm3axis_2d-space_pf_real-time-input_loop-traj';
+video_filename = 'm3axis_2d-space_pf_real-time-input_loop-traj';        %input index = 43;
 % success: 3(-),4,6,7,8(loop),9,10,11,12,13(-),14,16,17,18,19
 % failure: 15,32,34,35,36
-% t_input_idx = 10;
+t_input_idx = 3;
 % t_input_idx = 29;
 % t_input_idx = 36;
-t_input_idx = 43;
+% t_input_idx = 43;
 % heading_noise = .50;
 heading_noise = .01;
 
@@ -166,13 +166,14 @@ tM = processed_data.Magnetometer(locs,:);
 est = zeros(length(tM),3);
 err = zeros(length(tM),n);
 %%
-if video_flag
-    v = VideoWriter(strcat('movie_files/',video_filename,'.mp4'),'MPEG-4');
-    v.FrameRate = 10;
-    v.Quality = 100;
-    open(v);
-    frame = getframe(gcf);
-    writeVideo(v,frame);
+switch video_flag
+    case 1
+        v = VideoWriter(strcat('movie_files/',video_filename,'.mp4'),'MPEG-4');
+        v.FrameRate = 10;
+        v.Quality = 100;
+        open(v);
+        frame = getframe(gcf);
+        writeVideo(v,frame);
 end
 
 for i = 1:length(tM)
@@ -183,6 +184,8 @@ for i = 1:length(tM)
 %     ps.y = ps.y + sin(ps.mag_heading-pi/2);
     sl = .7;
 %     ps.mag_heading = ps.mag_heading+euler(i,3);
+%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*(sl + random('Uniform',-1,1,n,1));
+%     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*(sl + random('Uniform',-1,1,n,1));
     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
     ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
 %     ps.x = ps.x + ps.stlng.*cos(ps.heading);
@@ -238,12 +241,12 @@ for i = 1:length(tM)
     ps.x = ps.x(resample_idx);
     ps.y = ps.y(resample_idx);
     
-    if std_euler(i) > 0.03
-        ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,std_euler(i),n,1);
-    else
-        ps.mag_heading = ps.mag_heading(resample_idx);
-    end
-%     ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,heading_noise,n,1);    
+%     if std_euler(i) > 0.03
+%         ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,std_euler(i),n,1);
+%     else
+%         ps.mag_heading = ps.mag_heading(resample_idx);
+%     end
+    ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,heading_noise,n,1);    
 %     ps.phy_heading = ps.phy_heading(resample_idx)+random('normal',0,.001,n,1);
 
 %     ps.heading = ps.heading(resample_idx)+random('Uniform', -pi/10,pi/10,n,1);
@@ -261,13 +264,13 @@ for i = 1:length(tM)
     err(i,:) = pdist2([mean(ps.x),mean(ps.y)],[ps.x,ps.y]);
 %     break
 %     pause(.1)
-    
-    if video_flag
+    switch video_flag
+        case 1
         frame = getframe(gcf);
         writeVideo(v,frame);
     end
 end
-if video_flag close(v);end
+switch video_flag, case 1, close(v);end
 % %%
 % close all
 % subplot(121)
@@ -285,15 +288,18 @@ if video_flag close(v);end
 figure
 err_std = std(err,0,2);
 converge_idx = find(err_std <= 2,1);
-% A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
-% 
-% xWorldLimits = [-1 1650/20];
-% yWorldLimits = [-1 660/20];
-% RA = imref2d(size(A),xWorldLimits,yWorldLimits);
-% imshow(flipud(A),RA);
-% axis xy;
+tracking_show_with_map = true;
+if tracking_show_with_map
+    A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
 
-% axis equal
+    xWorldLimits = [-1 1650/20];
+    yWorldLimits = [-1 660/20];
+    RA = imref2d(size(A),xWorldLimits,yWorldLimits);
+    imshow(flipud(A),RA);
+    axis xy;
+
+    axis equal
+end
 
 hold on
 plot(est(1:converge_idx,1), est(1:converge_idx,2),'xr')

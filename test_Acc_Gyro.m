@@ -1,7 +1,8 @@
 clear;close all;clc;
 
 target_rawdata_paths = getNameFolds('rawdata');
-rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{43})); 
+rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{3})); 
+% rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{43})); 
 % index 9 also available
 
 % rawdata = load_rawdata('181217_170914_656_N1_긴복도_동쪽방향');
@@ -105,7 +106,7 @@ axis image
 grid on
 grid minor
 
-set(gcf,'units','points','position',[500,500,800,600])
+set(gcf,'units','points','position',[1300,500,800,600])
 sdf(gcf,'sj2')
 
 print -clipboard -dbitmap
