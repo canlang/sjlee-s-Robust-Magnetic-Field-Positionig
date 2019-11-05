@@ -222,7 +222,7 @@ for i = 1:length(tM)
         ps.x = data1.x(rand_idx);
         ps.y = data1.y(rand_idx);
         ps.mag_heading = random('Uniform', 0,2*pi,n,1);
-        ps.phy_heading = random('Uniform', 0,2*pi,n,1);
+%         ps.phy_heading = random('Uniform', 0,2*pi,n,1);
         ps.prob = ones(n,1)*(1/n);
     else
         ps.prob = ps.prob./sum(ps.prob);
@@ -240,6 +240,8 @@ for i = 1:length(tM)
     
     if std_euler(i) > 0.03
         ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,std_euler(i),n,1);
+    else
+        ps.mag_heading = ps.mag_heading(resample_idx);
     end
 %     ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,heading_noise,n,1);    
 %     ps.phy_heading = ps.phy_heading(resample_idx)+random('normal',0,.001,n,1);
