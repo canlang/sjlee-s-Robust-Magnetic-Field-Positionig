@@ -1,50 +1,34 @@
 clear; close all;
+% purpose: convert the step length as a latent variable
 
 % flag: Video save
 video_flag = 0;
-% video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_5';%nonshifted input??
-video_filename = 'm3axis_2d-space_pf_real-time-input_loop-traj';        %input index = 43;
+
 % success: 3(->path),4(<-path),6,7,8(loop),9,10,11,12,13(-),14,16,17,18,19
 % failure: 15,32,34,35,36
-t_input_idx = 4;
+% loop: 43,
+
+t_input_idx = 3;
 % t_input_idx = 29;
 % t_input_idx = 36;
-% t_input_idx = 43;
-% heading_noise = .50;
-heading_noise = .01;
 
-%%
-data1 = readtable('batch.csv');
-lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
-% INTERPOLATION
-x = data1.x;
-y = data1.y;
-newlM = [];
-for i=1:3
-    z = lM(:,i);
-    XI = min(x):.5:max(x);
-    YI = min(y):.5:max(y);
-    [X,Y] = meshgrid(XI,YI);
-    shp = alphaShape(x,y);
-    in = inShape(shp,X,Y);
-    xg = X(in);
-    yg = Y(in);
-    zg = griddata(x,y,z,xg,yg,'nearest');         % 2. griddata() : INTERPOLATION
-    if isempty(newlM)
-        newlM = [xg,yg,zg];
-    else
-        newlM = [newlM,zg];
-        if ~isequal(newlM(:,1:2), [xg,yg])
-            disp 'error'
-        end
-    end
+switch t_input_idx
+    case 43
+        video_filename = 'm3axis_2d-space_pf_real-time-input_loop-traj';        %input index = 43;
+    otherwise
+        video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_6';%nonshifted input??
 end
-data1 = array2table(newlM(:,1:2), 'VariableNames',{'x','y'});
-lM = newlM(:,3:end);
+
+heading_noise = .01;        % heading noise candidates: .50
+%%
+map = magmap_construction('mats',.5);
+lm.x = map(:,1);lm.y = map(:,2);
+lM = map(:,3:5);
+
 %%
 % #1. old testing data
 % data2 = readtable('20171124 MagCoord3axisData.csv');
-% #2. new collected data
+% #2. new collected data (realistic tracking)
 target_rawdata_paths = getNameFolds('rawdata');
 rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{t_input_idx}));
 
@@ -103,7 +87,7 @@ axis xy;
 
 % draw learning data
 hold on
-plot(data1.x,data1.y,'.','MarkerSize', 10)
+plot(lm.x,lm.y,'.','MarkerSize', 10)
 % plot(lM(:,1),lM(:,2),'.','MarkerSize', 10)
 % for save eps
 legend('reference point')
@@ -121,13 +105,13 @@ plot(shp,'FaceAlpha',.5,'EdgeColor','r')
 % initialize particle
 n = 2000;
 % 1. only road
-rand_idx = randi(length(data1.x),n,1);
-ps.x = data1.x(rand_idx);
-ps.y = data1.y(rand_idx);
+rand_idx = randi(length(lm.x),n,1);
+ps.x = lm.x(rand_idx);
+ps.y = lm.y(rand_idx);
 
 % 2. all area
-% ps.x = random('Uniform', min(data1.x),max(data1.x),n,1);
-% ps.y = random('Uniform', min(data1.y),max(data1.y),n,1);
+% ps.x = random('Uniform', min(lm.x),max(lm.x),n,1);
+% ps.y = random('Uniform', min(lm.y),max(lm.y),n,1);
 
 % 3. initial area
 % ps.x = data2.coord_x(1)+random('normal',0,5,n,1);
@@ -184,18 +168,19 @@ for i = 1:length(tM)
 %     ps.y = ps.y + sin(ps.mag_heading-pi/2);
     sl = .7;
 %     ps.mag_heading = ps.mag_heading+euler(i,3);
-    ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*(sl + random('Uniform',-1,1,n,1));
-    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*(sl + random('Uniform',-1,1,n,1));
+%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*(sl + random('Uniform',-1,1,n,1));
+%     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*(sl + random('Uniform',-1,1,n,1));
 %     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl;
 %     ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl;
-%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
+    ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
 %     ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
+    ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl + random('Uniform',-.3,.3,n,1);
 %     ps.x = ps.x + ps.stlng.*cos(ps.heading);
 %     ps.y = ps.y + ps.stlng.*sin(ps.heading);
     
     % ================ UPDATE    
     % 1. find (geo-locational) nearest learning data
-    [phy_dist,I] = pdist2([data1.x,data1.y],[ps.x,ps.y],'euclidean','Smallest',1);
+    [phy_dist,I] = pdist2([lm.x,lm.y],[ps.x,ps.y],'euclidean','Smallest',1);
     % 2. calculate Rotated magnetic field data and magnetic distance
     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),ps.mag_heading,...
         'UniformOutput',false);
@@ -223,9 +208,9 @@ for i = 1:length(tM)
     ps.prob(phy_dist'>3) = 0;
     
     if sum(ps.prob) == 0
-        rand_idx = randi(length(data1.x),n,1);
-        ps.x = data1.x(rand_idx);
-        ps.y = data1.y(rand_idx);
+        rand_idx = randi(length(lm.x),n,1);
+        ps.x = lm.x(rand_idx);
+        ps.y = lm.y(rand_idx);
         ps.mag_heading = random('Uniform', 0,2*pi,n,1);
 %         ps.phy_heading = random('Uniform', 0,2*pi,n,1);
         ps.prob = ones(n,1)*(1/n);
