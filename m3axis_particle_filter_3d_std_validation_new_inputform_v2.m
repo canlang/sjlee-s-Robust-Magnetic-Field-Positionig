@@ -4,11 +4,11 @@ clear; close all;
 % flag: Video save
 video_flag = 0;
 
-% success: 3(->path),4(<-path),6,7,8(loop),9,10,11,12,13(-),14,16,17,18,19
+% success: 3(->path),4(<-path),6+,7+,8(loop-),9(loop+),10,11,12,13(-),14,16,17,18,19
 % failure: 15,32,34,35,36
 % loop: 43,
 
-t_input_idx = 3;
+t_input_idx = 4;
 % t_input_idx = 29;
 % t_input_idx = 36;
 
@@ -19,7 +19,7 @@ switch t_input_idx
         video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_6';%nonshifted input??
 end
 
-heading_noise = .01;        % heading noise candidates: .50
+heading_noise = .01;        % heading noise candidates: .01, .50
 %%
 map = magmap_construction('mats',.5);
 lm.x = map(:,1);lm.y = map(:,2);
@@ -54,8 +54,10 @@ for t = 1:length(processed_data.Time)
     quaternion(t, :) = AHRS.Quaternion;
 end
 
-euler = quatern2euler(quaternConj(quaternion(locs,:)));	% use conjugate for sensor frame relative to Earth and convert to degrees.
-% euler = quatern2euler(quaternConj(quaternion)) * (180/pi);	% use conjugate for sensor frame relative to Earth and convert to degrees.
+% euler : use conjugate for sensor frame relative to Earth and convert to degrees.
+euler = quatern2euler(quaternConj(quaternion(locs,:)));	
+% euler = quatern2euler(quaternConj(quaternion)) * (180/pi);
+d_heading = [0;diff(euler(:,3))];
 
 rotMat = quatern2rotMat(quaternion(locs,:));
 % rotMat = quatern2rotMat(quaternConj(quaternion(locs,:)));
@@ -118,8 +120,9 @@ ps.y = lm.y(rand_idx);
 % ps.y = data2.coord_y(1)+random('normal',0,5,n,1);
 % ps.y = 15+random('normal',0,5,n,1);
 
+ps.sl = ones(n,1)*.7;
 ps.mag_heading = random('Uniform', 0,2*pi,n,1);
-ps.phy_heading = random('Uniform', 0,2*pi,n,1);
+% ps.phy_heading = random('Uniform', 0,2*pi,n,1);
 ps.prob = ones(n,1)*(1/n);
 % ps.stlng = ones(n,1) + random('Uniform', -.1,.1,n,1);
 
@@ -166,15 +169,25 @@ for i = 1:length(tM)
 %     ps.y = bsxfun(@(x,y) x + sin(y),ps.y,ps.phy_heading);
 %     ps.x = ps.x + cos(ps.mag_heading-pi/2);     % when heading shifted input date
 %     ps.y = ps.y + sin(ps.mag_heading-pi/2);
-    sl = .7;
+    
+    if i>1
+%         Halpha = pi-est(i-1,3);
+        Halpha = 0;
+        ps.mag_heading = ps.mag_heading+random('normal',Halpha,.03,n,1);     % candidate, .08
+    else
 %     ps.mag_heading = ps.mag_heading+euler(i,3);
-%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*(sl + random('Uniform',-1,1,n,1));
-%     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*(sl + random('Uniform',-1,1,n,1));
+        ps.mag_heading = ps.mag_heading+random('normal',0,.03,n,1);     % candidate, .08
+    end
+    
+    ps.sl = .7 + random('normal',0,.5,n,1);
+    ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
+    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.01,.01,n,1);
 %     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl;
 %     ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl;
-    ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
+%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
 %     ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
-    ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl + random('Uniform',-.3,.3,n,1);
+%     ps.x = ps.x + cos(ps.mag_heading+d_heading(i))*sl + random('Uniform',-1,1,n,1);
+%     ps.y = ps.y + sin(ps.mag_heading+d_heading(i))*sl + random('Uniform',-1,1,n,1);
 %     ps.x = ps.x + ps.stlng.*cos(ps.heading);
 %     ps.y = ps.y + ps.stlng.*sin(ps.heading);
     
@@ -182,11 +195,23 @@ for i = 1:length(tM)
     % 1. find (geo-locational) nearest learning data
     [phy_dist,I] = pdist2([lm.x,lm.y],[ps.x,ps.y],'euclidean','Smallest',1);
     % 2. calculate Rotated magnetic field data and magnetic distance
-    R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),ps.mag_heading,...
-        'UniformOutput',false);
+    
 %     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),0,...
 %         'UniformOutput',false);
-    rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
+%     rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
+
+%     (1) UPDATE FUNCTION candidate 
+%     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]*(rotMat(:,:,i))),ps.mag_heading,...
+%         'UniformOutput',false); 
+%     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+%     (2) UPDATE FUNCTION candidate  
+%     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),ps.mag_heading,...
+%         'UniformOutput',false); 
+%     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
+%     (3) UPDATE FUNCTION candidate  
+    R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps.mag_heading,...
+        'UniformOutput',false); 
+    rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
     
     % EUCLIDEAN
     % TODO: may be more optimizable (DONE?maybe)
@@ -227,13 +252,16 @@ for i = 1:length(tM)
 %     ps.y = ps.y(resample_idx) + random('normal',0,.5,n,1);
     ps.x = ps.x(resample_idx);
     ps.y = ps.y(resample_idx);
+    ps.mag_heading = ps.mag_heading(resample_idx);
+    ps.sl = ps.sl(resample_idx);
     
 %     if std_euler(i) > 0.03
 %         ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,std_euler(i),n,1);
 %     else
 %         ps.mag_heading = ps.mag_heading(resample_idx);
 %     end
-    ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,heading_noise,n,1);    
+%     ps.mag_heading = ps.mag_heading(resample_idx)+random('normal',0,heading_noise,n,1);    
+%     ps.mag_heading = ps.mag_heading(resample_idx);
 %     ps.phy_heading = ps.phy_heading(resample_idx)+random('normal',0,.001,n,1);
 
 %     ps.heading = ps.heading(resample_idx)+random('Uniform', -pi/10,pi/10,n,1);
@@ -246,7 +274,9 @@ for i = 1:length(tM)
     drawnow
     
 %     est(i,:) = [mean(ps.x),mean(ps.y),mean(angdiff(ps.mag_heading,0))];
-    est(i,:) = [mean(ps.x),mean(ps.y),mean(abs(angdiff(ps.mag_heading,0)))];        %x,y,heading
+%     est(i,:) = [mean(ps.x),mean(ps.y),mean(abs(angdiff(ps.mag_heading,0)))];        %x,y,heading
+    est(i,:) = [mean(ps.x),mean(ps.y),circ_mean(ps.mag_heading)]; 
+    
 %     err(i,:) = pdist2([data2.coord_x(i),data2.coord_y(i)],[ps.x,ps.y]);
     err(i,:) = pdist2([mean(ps.x),mean(ps.y)],[ps.x,ps.y]);
 %     break
@@ -299,7 +329,46 @@ legend('\sigma>2','\sigma\leq2')
 % set(p.Edge, 'ColorBinding','interpolated', 'ColorData',cd)
 
 sdf(gcf,'sj')
-print -depsc2 eps/18times_repeat_circle.eps
+% print -depsc2 eps/18times_repeat_circle.eps
+
+%%
+figure
+subplot(311)
+% (1)
+% histogram(wrapTo2Pi(ps.phy_heading))
+% xlabel('Physical Heading')
+% xlim([0 2*pi])
+% set(gca,'XTick',0:pi/2:2*pi) 
+% set(gca,'XTickLabel',{'0','pi/2','pi','3pi/2','2pi'}) 
+% (2)
+plot(est(:,3))
+grid on
+ylim([-pi pi])
+set(gca,'YTick',-pi:pi/2:pi) 
+set(gca,'YTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi',}) 
+xlabel('input index')
+ylabel('Magnetic \Delta (rad)')
+
+subplot(312)
+plot(euler(:,3))
+grid on
+ylim([-pi pi])
+set(gca,'YTick',-pi:pi/2:pi) 
+set(gca,'YTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi',}) 
+xlabel('input index')
+ylabel('Relative \psi (rad)')
+
+subplot(313)
+% stem(wrapTo2Pi(ps.mag_heading),ones(n,1))
+histogram(wrapTo2Pi(ps.mag_heading),n/2)
+xlabel('Latest Time Magnetic Heading')
+xlim([0 2*pi])
+set(gca,'XTick',0:pi/2:2*pi) 
+set(gca,'XTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'})
+
+set(gcf,'units','points','position',[800,100,900,700])
+sdf(gcf,'sj')
+
 return
 %% for papaer figure (without map image)
 close all
@@ -336,24 +405,6 @@ sdf(gcf,'sj2')
 print -depsc2 eps/18times_repeat_circle_raw.eps
 return
 
-%%
-figure
-subplot(211)
-histogram(wrapTo2Pi(ps.phy_heading))
-xlabel('Physical Heading')
-xlim([0 2*pi])
-set(gca,'XTick',0:pi/2:2*pi) 
-set(gca,'XTickLabel',{'0','pi/2','pi','3pi/2','2pi'}) 
-subplot(212)
-% stem(wrapTo2Pi(ps.mag_heading),ones(n,1))
-histogram(wrapTo2Pi(ps.mag_heading),n/2)
-xlabel('Magnetic Heading')
-xlim([0 2*pi])
-set(gca,'XTick',0:pi/2:2*pi) 
-set(gca,'XTickLabel',{'0','pi/2','pi','3pi/2','2pi'})
-
-set(gcf,'units','points','position',[800,300,800,500])
-sdf(gcf,'sj')
 
 
 %% positioning and heading error (x: location, y: err)

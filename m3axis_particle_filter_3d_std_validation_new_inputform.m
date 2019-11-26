@@ -6,8 +6,8 @@ video_flag = 0;
 video_filename = 'm3axis_2d-space_pf_real-time-input_loop-traj';        %input index = 43;
 % success: 3(->path),4(<-path),6,7,8(loop),9,10,11,12,13(-),14,16,17,18,19
 % failure: 15,32,34,35,36
-t_input_idx = 4;
-% t_input_idx = 29;
+% t_input_idx = 12;
+t_input_idx = 29;
 % t_input_idx = 36;
 % t_input_idx = 43;
 % heading_noise = .50;
@@ -184,12 +184,12 @@ for i = 1:length(tM)
 %     ps.y = ps.y + sin(ps.mag_heading-pi/2);
     sl = .7;
 %     ps.mag_heading = ps.mag_heading+euler(i,3);
-    ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*(sl + random('Uniform',-1,1,n,1));
-    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*(sl + random('Uniform',-1,1,n,1));
+%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*(sl + random('Uniform',-1,1,n,1));
+%     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*(sl + random('Uniform',-1,1,n,1));
 %     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl;
 %     ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl;
-%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
-%     ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
+    ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
+    ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
 %     ps.x = ps.x + ps.stlng.*cos(ps.heading);
 %     ps.y = ps.y + ps.stlng.*sin(ps.heading);
     
