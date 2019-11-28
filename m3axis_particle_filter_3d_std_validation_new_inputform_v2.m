@@ -8,7 +8,7 @@ video_flag = 0;
 % failure: 15,32,34,35,36
 % loop: 43,
 
-t_input_idx = 4;
+t_input_idx = 3;
 % t_input_idx = 29;
 % t_input_idx = 36;
 
@@ -180,8 +180,14 @@ for i = 1:length(tM)
     end
     
     ps.sl = .7 + random('normal',0,.5,n,1);
+    
+%     mu = [0,0];
+%     sigma = [0.1 0; 0 0.01];
+%     mvnRand = mvnrnd(mu,sigma,n);
+%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ mvnRand(:,1);
+%     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ mvnRand(:,2);
     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
-    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.01,.01,n,1);
+    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
 %     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl;
 %     ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl;
 %     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
