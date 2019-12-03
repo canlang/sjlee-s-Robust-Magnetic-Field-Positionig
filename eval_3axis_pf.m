@@ -163,6 +163,7 @@ for i = 1:length(tM)
     ps.sl = ps.sl(resample_idx);
 
     est(i,:) = [mean(ps.x),mean(ps.y),circ_mean(ps.mag_heading)];     
+    err(i,:) = pdist2([mean(ps.x),mean(ps.y)],[ps.x,ps.y]);
 end
 
 %%
