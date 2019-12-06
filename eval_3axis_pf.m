@@ -167,15 +167,20 @@ for i = 1:length(tM)
 end
 
 %%
-
+ncp = 5;       % not_converge_panelty
 err_std = std(err,0,2);
 converge_idx = find(err_std <= 2,1);
-% [9,21],[71,21]
-gt_x = linspace(9,70.7,length(tM));
-gt_y = 21.2*ones(1,length(tM));
+if ~isempty(converge_idx)
+    % [9,21],[71,21]
+    gt_x = linspace(9,70.7,length(tM));
+    gt_y = 21.2*ones(1,length(tM));
 
-traj_errors = diag(pdist2([est(converge_idx:end,1),est(converge_idx:end,2)],...
-    [gt_x(converge_idx:end)',gt_y(converge_idx:end)']));
+    traj_errors = diag(pdist2([est(converge_idx:end,1),est(converge_idx:end,2)],...
+        [gt_x(converge_idx:end)',gt_y(converge_idx:end)']));
+    traj_errors = [ones(converge_idx-1,1)*ncp; traj_errors];
+else
+    traj_errors = ones(1,length(est))*ncp;
+end
 
     %% local functions -----------------------------------------------------------------
     % 1st local function

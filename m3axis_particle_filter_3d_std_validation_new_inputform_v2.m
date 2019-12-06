@@ -19,7 +19,7 @@ switch t_input_idx
         video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_6';%nonshifted input??
 end
 
-heading_noise = .01;        % heading noise candidates: .01, .50
+% heading_noise = .01;        % heading noise candidates: .01, .50
 %%
 map = magmap_construction('mats',.5);
 lm.x = map(:,1);lm.y = map(:,2);
@@ -169,25 +169,28 @@ for i = 1:length(tM)
 %     ps.y = bsxfun(@(x,y) x + sin(y),ps.y,ps.phy_heading);
 %     ps.x = ps.x + cos(ps.mag_heading-pi/2);     % when heading shifted input date
 %     ps.y = ps.y + sin(ps.mag_heading-pi/2);
-    
+    hN = .03;      % heading noise value
     if i>1
 %         Halpha = pi-est(i-1,3);
         Halpha = 0;
-        ps.mag_heading = ps.mag_heading+random('normal',Halpha,.03,n,1);     % candidate, .08
+        ps.mag_heading = ps.mag_heading+random('normal',Halpha,hN,n,1);     % candidate, .08
     else
 %     ps.mag_heading = ps.mag_heading+euler(i,3);
-        ps.mag_heading = ps.mag_heading+random('normal',0,.03,n,1);     % candidate, .08
+        ps.mag_heading = ps.mag_heading+random('normal',0,hN,n,1);     % candidate, .08
     end
     
     ps.sl = .7 + random('normal',0,.5,n,1);
     
-%     mu = [0,0];
-%     sigma = [0.1 0; 0 0.01];
-%     mvnRand = mvnrnd(mu,sigma,n);
-%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ mvnRand(:,1);
-%     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ mvnRand(:,2);
-    ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
-    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
+    mu = [0,0];
+%     sigma = [0.10409786, 0.13461109; 0.13461109, 0.29744705];
+    sigma = [2.97925885  0.02243997;0.02243997  0.98844656];
+    mvnRand = mvnrnd(mu,sigma,n);
+    ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ mvnRand(:,1);
+    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ mvnRand(:,2);
+
+%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
+%     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
+
 %     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl;
 %     ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl;
 %     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl + random('Uniform',-1,1,n,1);
