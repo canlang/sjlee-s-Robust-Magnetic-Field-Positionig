@@ -1,17 +1,22 @@
 clear; close all;
 
-addpath('xyz file operations')
+% addpath('xyz file operations')
 
-data1 = readtable('batch.csv');
+% data1 = readtable('batch.csv');
+% lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
-lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
+data1 = readtable('sw_maps/dataset_ki_1f.csv');
+data1 = rmmissing(data1);
+lM = [data1.mag_x,data1.mag_y,data1.mag_z];
+
+
 % DATA SPLIT
-x = data1.x;
-y = data1.y;
+x = data1.loc_x;
+y = data1.loc_y;
 % z{1} = vecnorm(lM,2,2);    % L2 norm
-z{1} = data1.magnet_x;     % x component
-z{2} = data1.magnet_y;     % y component
-z{3} = data1.magnet_z;     % z component
+z{1} = data1.mag_x;     % x component
+z{2} = data1.mag_y;     % y component
+z{3} = data1.mag_z;     % z component
 hold on
 for k=1:3
     [X,Y,Z] = interpolation_by_alphashape(x,y,z{k},.3);

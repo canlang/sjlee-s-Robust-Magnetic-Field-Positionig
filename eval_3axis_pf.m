@@ -1,10 +1,10 @@
-function traj_errors = eval_3axis_pf(a,b,c)
+function traj_errors = eval_3axis_pf(t_input_idx,a,b)
 % clear; close all;
 % purpose: evaluate score the trajectory
 % from: revised from
 % m3axis_particle_filter_3d_std_validation_newinput_form_v2.m file
 
-t_input_idx = 3;
+% t_input_idx = 3;
 % t_input_idx = 29;
 % t_input_idx = 36;
 
@@ -114,7 +114,7 @@ for i = 1:length(tM)
     ps.sl = .7 + random('normal',0,.5,n,1);
     
     mu = [0,0];
-    sigma = [a b; b c];
+    sigma = [a 0; 0 b];
     mvnRand = mvnrnd(mu,sigma,n);
     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ mvnRand(:,1);
     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ mvnRand(:,2);
@@ -171,7 +171,7 @@ ncp = 5;       % not_converge_panelty
 err_std = std(err,0,2);
 converge_idx = find(err_std <= 2,1);
 if ~isempty(converge_idx)
-    % [9,21],[71,21]
+    % ground truth point - start & end : [9,21],[71,21]
     gt_x = linspace(9,70.7,length(tM));
     gt_y = 21.2*ones(1,length(tM));
 

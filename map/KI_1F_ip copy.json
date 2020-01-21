@@ -1,0 +1,59 @@
+{
+  "Types": [
+    "Magnet",
+    "Wi-Fi"
+  ],
+  "Datum": [
+    "magnet.txt",
+    "wifi.txt"
+  ],
+  "Description": "오픈스페이스 테스트 용으로 수집\n 제외 영역 추가\n30cm Interpolation",
+  "CollectTime": "2016-03-21",
+  "Collector": "ISILab (isilab.kaist@gmail.com)",
+  "FloorName": "KI Building - Floor 1",
+  "North": 0.0,
+  "Image": "Image.png",
+  "CollectDevice": "Nexus 5",
+  "Boundary": {
+    "LeftTop": [
+      0.0,
+      69.7
+    ],
+    "Collected": {
+      "Area": [
+        [
+          31.0,
+          9.0
+        ],
+        [
+          31.0,
+          46.5
+        ],
+        [
+          51.0,
+          46.5
+        ],
+        [
+          51.0,
+          16.0
+        ],
+        [
+          46.5,
+          16.0
+        ],
+        [
+          46.5,
+          9.0
+        ]
+      ],
+      "Excepts": [
+        []
+      ]
+    },
+    "RightBottom": [
+      64.65,
+      0.0
+    ]
+  },
+  "MeterPerPx": 0.05
+}

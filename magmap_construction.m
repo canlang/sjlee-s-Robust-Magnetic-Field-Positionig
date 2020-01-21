@@ -1,8 +1,8 @@
-function map = magmap_construction(path,d)
+function map = magmap_construction(mypath,d)
 % d: interval
 % addpath(genpath(path));
-if exist(fullfile(path,['magmap',num2str(d),'.mat']), 'file') == 2
-    load(fullfile(path,['magmap',num2str(d),'.mat']), 'map')    
+if exist(fullfile(mypath,['magmap',num2str(d),'.mat']), 'file') == 2
+    load(fullfile(mypath,['magmap',num2str(d),'.mat']), 'map')    
 else
     data1 = readtable('batch.csv');
     lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
@@ -31,6 +31,6 @@ else
     end
     data1 = array2table(newlM(:,1:2), 'VariableNames',{'x','y'});
     map = [data1.x, data1.y, newlM(:,3:end)];
-    save(fullfile(path,['magmap',num2str(d),'.mat']),'map')
+    save(fullfile(mypath,['magmap',num2str(d),'.mat']),'map')
 end
 

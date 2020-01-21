@@ -1,7 +1,7 @@
 clear;close all;clc;
 
 target_rawdata_paths = getNameFolds('rawdata');
-rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{20})); 
+rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{63})); 
 % rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{43})); 
 % index 9 also available
 % index 36 good sample (tracking visual)

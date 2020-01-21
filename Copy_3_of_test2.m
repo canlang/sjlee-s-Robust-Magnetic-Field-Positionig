@@ -1,3 +1,5 @@
+% PLOTTING
+
 clear; close all;
 data1 = readtable('batch.csv');
 data2 = readtable('20171124 MagCoord3axisData.csv');

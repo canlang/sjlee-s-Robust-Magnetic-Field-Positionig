@@ -8,7 +8,7 @@ video_flag = 0;
 % failure: 15,32,34,35,36
 % loop: 43,
 
-t_input_idx = 3;
+t_input_idx = 43;
 % t_input_idx = 29;
 % t_input_idx = 36;
 
@@ -163,6 +163,8 @@ switch video_flag
         writeVideo(v,frame);
 end
 
+yaw_offset = 0;       % pi/2
+
 for i = 1:length(tM)
     % ================ PREDICTION
 %     ps.x = bsxfun(@(x,y) x + cos(y),ps.x,ps.phy_heading);
@@ -183,10 +185,11 @@ for i = 1:length(tM)
     
     mu = [0,0];
 %     sigma = [0.10409786, 0.13461109; 0.13461109, 0.29744705];
-    sigma = [2.97925885  0.02243997;0.02243997  0.98844656];
+%     sigma = [1.43724175 -0.93884837;-0.93884837  0.74606608];
+    sigma = [0.02765426 0;0  0.04181993];
     mvnRand = mvnrnd(mu,sigma,n);
-    ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ mvnRand(:,1);
-    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ mvnRand(:,2);
+    ps.x = ps.x + cos(ps.mag_heading+euler(i,3)+yaw_offset).*ps.sl+ mvnRand(:,1);
+    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)+yaw_offset).*ps.sl+ mvnRand(:,2);
 
 %     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
 %     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
@@ -218,9 +221,12 @@ for i = 1:length(tM)
 %         'UniformOutput',false); 
 %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
 %     (3) UPDATE FUNCTION candidate  
-    R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps.mag_heading,...
-        'UniformOutput',false); 
-    rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+%     R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),...
+%         ps.mag_heading,'UniformOutput',false); 
+%     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+    R = arrayfun(@(x) euler2rotMat(euler(1,1),euler(1,2),x),...
+        euler(1,3)+ps.mag_heading,'UniformOutput',false);
+    rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
     
     % EUCLIDEAN
     % TODO: may be more optimizable (DONE?maybe)
@@ -231,8 +237,7 @@ for i = 1:length(tM)
     % COSINE
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
 
-
-    if all(mag_dist) == 0
+    if ~all(mag_dist)
         break
     end
     ps.prob = 1./(mag_dist);
