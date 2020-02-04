@@ -1,41 +1,53 @@
 clear all
 
-path_coord{1}.x = [9,70.7];
-path_coord{1}.y = 21;
-
-path_coord{2}.x = [12,80];
-path_coord{2}.y = 8;
-
-path_coord{3}.x = 22;
-path_coord{3}.y = [21,8];
-
-path_coord{4}.x = 38.3;
-path_coord{4}.y = [21,8];
-
-path_coord{5}.x = 54;
-path_coord{5}.y = [21,8];
-
-path_coord{6}.x = 71;
-path_coord{6}.y = [21,8];
-
-path_coord{7}.x = [9,70.7];
-path_coord{7}.y = 21.6;
-
-path_coord{8}.x = [9,70.7];
-path_coord{8}.y = 20.4;
-
-path_coord{9}.x = [12,80];
-path_coord{9}.y = 8.6;
-
-path_coord{10}.x = [12,80];
-path_coord{10}.y = 7.4;
-%%
+%% N1 7F 
+% path_coord{1}.x = [9,70.7];
+% path_coord{1}.y = 21;
+% 
+% path_coord{2}.x = [12,80];
+% path_coord{2}.y = 8;
+% 
+% path_coord{3}.x = 22;
+% path_coord{3}.y = [21,8];
+% 
+% path_coord{4}.x = 38.3;
+% path_coord{4}.y = [21,8];
+% 
+% path_coord{5}.x = 54;
+% path_coord{5}.y = [21,8];
+% 
+% path_coord{6}.x = 71;
+% path_coord{6}.y = [21,8];
+% 
+% path_coord{7}.x = [9,70.7];
+% path_coord{7}.y = 21.6;
+% 
+% path_coord{8}.x = [9,70.7];
+% path_coord{8}.y = 20.4;
+% 
+% path_coord{9}.x = [12,80];
+% path_coord{9}.y = 8.6;
+% 
+% path_coord{10}.x = [12,80];
+% path_coord{10}.y = 7.4;
 
 % t_input_idx = 43;       % start index for radio-map rawdata.
 % radiomap_index = [44:(44+5),57:(57+3)];     % east-direction
-radiomap_index = [64];
+% radiomap_index = [64];          % south-direction
+
+%% N1 2F (grid open space)
+path_coord = cell(1,9);
+for i = 1:9
+    path_coord{i}.x = [38,56];
+    path_coord{i}.y = 7+0.7*i;
+end
+radiomap_index = 65:(65+8);             % n1 2f east
+
+%% KI 1F
+
+
 for i = 1:length(radiomap_index)
-    target_rawdata_paths = getNameFolds('rawdata');
+    target_rawdata_paths = getNameFolds('rawdata/ki*');
     rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{radiomap_index(i)}));
 %     rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{i+t_input_idx}));
 
@@ -90,13 +102,4 @@ for i = 1:length(radiomap_index)
 %         map = [map; remap];
 %     end
 end
-save(fullfile('mats',['magmap',num2str(0.6),'.mat']),'map')
-
-function nameFolds = getNameFolds(pathFolder)
-        d = dir(pathFolder);
-        isub = [d(:).isdir]; %# returns logical vector
-        nameFolds = {d(isub).name}';
-        nameFolds(ismember(nameFolds,{'.','..'})) = [];
-        % nameFolds(~cellfun(@isempty,regexp(nameFolds, '\d{6}'))) = [];
-end
-    
+save(fullfile('mats',['magmap-n1-2f-',num2str(0.6),'p.mat']),'map')

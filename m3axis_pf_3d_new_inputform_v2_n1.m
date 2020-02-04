@@ -13,6 +13,8 @@ t_input_idx = 61;
 % t_input_idx = 36;
 
 switch t_input_idx
+    case 61
+        video_filename = 'm3axis-pf-n1-2f';
     case 43
         video_filename = 'm3axis_2d-space_pf_real-time-input_loop-traj';        %input index = 43;
     otherwise
@@ -22,11 +24,14 @@ end
 % heading_noise = .01;        % heading noise candidates: .01, .50
 %%
 % map = magmap_construction('mats',.6);
+
+% load('mats/magmap-n1-2f-0.6p.mat');
 % lm.x = map(:,1);lm.y = map(:,2);
 % lM = map(:,3:5);
 
-data1 = readtable('sw_maps/dataset_n1_2f_result.csv');
+data1 = readtable('sw_maps/dataset_n1_2f_result2.csv');
 lM = [data1.mag_x,data1.mag_y,data1.mag_z];
+lm.x = data1.loc_x;lm.y = data1.loc_y;
 
 % INTERPOLATION
 % x = data1.loc_x;
@@ -57,7 +62,7 @@ lM = [data1.mag_x,data1.mag_y,data1.mag_z];
 % lm.x = map(:,1);lm.y = map(:,2);
 % lM = map(:,3:5);
 
-lm.x = data1.loc_x;lm.y = data1.loc_y;
+% lm.x = data1.loc_x;lm.y = data1.loc_y;
 
 %%
 % #1. old testing data
@@ -101,7 +106,8 @@ std_euler = stdfilt(unwrap(euler(:,3)));
 % plot(processed_data.Time, std_euler)
 
 %% inbound & outbound
-layout = loadjson('N1-2F.json');
+% layout = loadjson('map/N1-2F.json');
+layout = jsondecode(fileread('map/N1-2F.json'));
 
 x = layout.in(:,1);
 y = layout.in(:,2);
@@ -112,8 +118,10 @@ for i = 1:length(layout.out)
     shp = subtract(shp,polyshape(ox,oy));
 end
 
-A = imread('N1-2F.png','BackgroundColor',[1 1 1]);
-scale = 0.1265;
+A = imread('map/N1-2F.png','BackgroundColor',[1 1 1]);
+% scale = 0.1265;
+scale = 0.0395;
+
 xWorldLimits = [0 size(A,2)*scale];
 yWorldLimits = [0 size(A,1)*scale];
 % xWorldLimits = [-1 1650*.05];
@@ -255,10 +263,14 @@ for i = 1:length(tM)
 %         'UniformOutput',false); 
 %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
 %     (3) UPDATE FUNCTION candidate  
-    R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps.mag_heading,...
-        'UniformOutput',false); 
+    R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])...
+        ,-ps.mag_heading,'UniformOutput',false); 
     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
-    
+
+%     R = arrayfun(@(x) euler2rotMat(-euler(1,1),-euler(1,2),x),...
+%         -ps.mag_heading,'UniformOutput',false);
+%     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));    
+
     % EUCLIDEAN
     % TODO: may be more optimizable (DONE?maybe)
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
@@ -269,7 +281,7 @@ for i = 1:length(tM)
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
 
 
-    if all(mag_dist) == 0
+    if ~all(mag_dist)
         break
     end
     ps.prob = 1./(mag_dist);
@@ -353,9 +365,9 @@ err_std = std(err,0,2);
 converge_idx = find(err_std <= 2,1);
 tracking_show_with_map = true;
 if tracking_show_with_map
-    A = imread('N1-2F.png','BackgroundColor',[1 1 1]);
+    A = imread('map/N1-2F.png','BackgroundColor',[1 1 1]);
 
-    scale = 0.1265;
+%     scale = 0.1265;
     xWorldLimits = [0 size(A,2)*scale];
     yWorldLimits = [0 size(A,1)*scale];
     RA = imref2d(size(A),xWorldLimits,yWorldLimits);

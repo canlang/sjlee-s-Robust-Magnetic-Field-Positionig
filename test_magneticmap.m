@@ -2,11 +2,11 @@ clear; close all;
 % addpath('xyz file operations')
 
 %%
-data1 = readtable('batch.csv');
-lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
-x = data1.x;
-y = data1.y;
-z = vecnorm(lM,2,2);
+% data1 = readtable('batch.csv');
+% lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
+% x = data1.x;
+% y = data1.y;
+% z = vecnorm(lM,2,2);
 %%
 % data1 = readtable('sw_maps/dataset_n1_2f_result.csv');
 % lM = [data1.mag_x,data1.mag_y,data1.mag_z];
@@ -14,11 +14,20 @@ z = vecnorm(lM,2,2);
 % loc_y = data1.loc_y;
 % z = vecnorm(lM,2,2);
 %%
-data1 = readtable('sw_maps/dataset_ki_1f.csv');
-data1 = rmmissing(data1);
-lM = [data1.mag_x,data1.mag_y,data1.mag_z];
-x = data1.loc_x;
-y = data1.loc_y;
+% data1 = readtable('sw_maps/dataset_ki_1f.csv');
+% data1 = rmmissing(data1);
+% lM = [data1.mag_x,data1.mag_y,data1.mag_z];
+% x = data1.loc_x;
+% y = data1.loc_y;
+% z = vecnorm(lM,2,2);
+%%
+load('mats/magmap-n1-2f-0.6p.mat');
+x = map(:,1);
+y = map(:,2);
+lM = map(:,3:5);
+% lM = [data1.mag_x,data1.mag_y,data1.mag_z];
+% x = data1.loc_x;
+% y = data1.loc_y;
 z = vecnorm(lM,2,2);
 %%
 [X,Y,Z] = xyz2grid(x,y,z);

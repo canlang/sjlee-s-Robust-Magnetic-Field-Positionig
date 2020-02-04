@@ -8,7 +8,7 @@ video_flag = 0;
 % failure: 15,32,34,35,36
 % loop: 43,
 
-t_input_idx = 43;
+t_input_idx = 64;
 % t_input_idx = 29;
 % t_input_idx = 36;
 
@@ -21,7 +21,7 @@ end
 
 % heading_noise = .01;        % heading noise candidates: .01, .50
 %%
-map = magmap_construction('mats',.5);
+map = magmap_construction('mats',.6);
 lm.x = map(:,1);lm.y = map(:,2);
 lM = map(:,3:5);
 
@@ -67,7 +67,7 @@ std_euler = stdfilt(unwrap(euler(:,3)));
 % plot(processed_data.Time, std_euler)
 
 %% inbound & outbound
-layout = loadjson('N1-7F-HiRes2.json');
+layout = loadjson('map/N1-7F-HiRes2.json');
 
 x = layout.in(:,1);
 y = layout.in(:,2);
@@ -78,7 +78,7 @@ for i = 1:length(layout.out)
     shp = subtract(shp,polyshape(ox,oy));
 end
 
-A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
+A = imread('map/N1-7F.png','BackgroundColor',[1 1 1]);
 
 xWorldLimits = [-1 1650/20];
 yWorldLimits = [-1 660/20];
@@ -163,7 +163,8 @@ switch video_flag
         writeVideo(v,frame);
 end
 
-yaw_offset = 0;       % pi/2
+yaw_offset = pi/2;       % pi/2
+% yaw_offset = 0;       % pi/2
 
 for i = 1:length(tM)
     % ================ PREDICTION
@@ -203,7 +204,7 @@ for i = 1:length(tM)
 %     ps.x = ps.x + ps.stlng.*cos(ps.heading);
 %     ps.y = ps.y + ps.stlng.*sin(ps.heading);
     
-    % ================ UPDATE    
+    % ================ UPDATE
     % 1. find (geo-locational) nearest learning data
     [phy_dist,I] = pdist2([lm.x,lm.y],[ps.x,ps.y],'euclidean','Smallest',1);
     % 2. calculate Rotated magnetic field data and magnetic distance
@@ -221,12 +222,19 @@ for i = 1:length(tM)
 %         'UniformOutput',false); 
 %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
 %     (3) UPDATE FUNCTION candidate  
-%     R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),...
-%         ps.mag_heading,'UniformOutput',false); 
+    R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),...
+        -ps.mag_heading,'UniformOutput',false); 
+    rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+
+%     R = arrayfun(@(x) eulerAnglesToRotation3d(x,-euler(1,2),-euler(1,1))...
+%         ,-euler(1,3)-ps.mag_heading,'UniformOutput',false);
+%     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));    
+%     R = arrayfun(@(x) euler2rotMat(-euler(1,1),-euler(1,2),x),...
+%         -euler(1,3)-ps.mag_heading,'UniformOutput',false);
+%     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
+%     R = arrayfun(@(x) euler2rotMat(euler(1,1),euler(1,2),x),...
+%         euler(1,3)+ps.mag_heading,'UniformOutput',false);
 %     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
-    R = arrayfun(@(x) euler2rotMat(euler(1,1),euler(1,2),x),...
-        euler(1,3)+ps.mag_heading,'UniformOutput',false);
-    rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
     
     % EUCLIDEAN
     % TODO: may be more optimizable (DONE?maybe)
@@ -321,7 +329,7 @@ err_std = std(err,0,2);
 converge_idx = find(err_std <= 2,1);
 tracking_show_with_map = true;
 if tracking_show_with_map
-    A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
+    A = imread('map/N1-7F.png','BackgroundColor',[1 1 1]);
 
     xWorldLimits = [-1 1650/20];
     yWorldLimits = [-1 660/20];

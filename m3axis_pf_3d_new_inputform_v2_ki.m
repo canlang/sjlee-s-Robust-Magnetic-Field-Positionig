@@ -259,12 +259,13 @@ for i = 1:length(tM)
 %         'UniformOutput',false); 
 %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
 %     (3) UPDATE FUNCTION candidate  
-    R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps.mag_heading,...
-        'UniformOutput',false); 
+    R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])...
+        ,-ps.mag_heading,'UniformOutput',false); 
     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
-%     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])*rotMat(:,:,i)...,
-%         ,-euler(i,3)+ps.mag_heading,'UniformOutput',false); 
-%     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+
+%     R = arrayfun(@(x) euler2rotMat(-euler(1,1),-euler(1,2),x),...
+%         -euler(1,3)-ps.mag_heading,'UniformOutput',false);
+%     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
     
     % EUCLIDEAN
     % TODO: may be more optimizable (DONE?maybe)
@@ -276,7 +277,7 @@ for i = 1:length(tM)
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
 
 
-    if all(mag_dist) == 0
+    if ~all(mag_dist)
         break
     end
     ps.prob = 1./(mag_dist);
