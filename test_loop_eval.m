@@ -21,5 +21,6 @@ for j=1:length(intp)
     end
     all_errs = errs{:};
     MED = mean(rmoutliers(all_errs));
-    fprintf('Convergence rate: %.1f, MED: %.2f\n', Nsuccess/Nloop, MED);
+    fprintf('GeoMapInt: %.1f, Convergence rate: %.1f, MED: %.2f\n'...
+    , intp(j), Nsuccess/Nloop, MED);
 end
