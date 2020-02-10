@@ -26,6 +26,9 @@ else
         YI = min(y):d:max(y);
         [X,Y] = meshgrid(XI,YI);
         shp = alphaShape(x,y);
+        
+        disp(shp.Alpha)
+        shp.Alpha = .6;
         in = inShape(shp,X,Y);
         xg = X(in);
         yg = Y(in);
