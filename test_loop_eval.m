@@ -1,5 +1,5 @@
 
-Nloop = 5;
+Nloop = 10;
 Nfailure = 0;
 Nsuccess = 0;
 errs = cell(Nloop,1);
@@ -11,16 +11,15 @@ for j=1:length(intp)
         err = ILoA('KI-1F','MATE20pro',3,intp(j),false);
         %%    
         if sum(err<3)>length(err)/2
-            disp converged!
+            % disp converged!
             Nsuccess = Nsuccess+1;
             errs{i} = err;
         else
             Nfailure = Nfailure+1;
-            disp fail!
+            % disp fail!
         end
     end
+    all_errs = errs{:};
+    MED = mean(rmoutliers(all_errs));
+    fprintf('Convergence rate: %.1f, MED: %.2f\n', Nsuccess/Nloop, MED);
 end
-
-all_errs = errs{:};
-MED = mean(rmoutliers(all_errs));
-fprintf('Convergence rate: %.1f, MED: %.2f\n', Nsuccess/Nloop, MED);
