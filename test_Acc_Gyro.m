@@ -1,7 +1,12 @@
 clear;close all;clc;
 
-target_rawdata_paths = getNameFolds('rawdata');
-rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{61})); 
+% path_dir = 'rawdata';
+path_dir = 'rawdata/test-ki-huawei';
+
+target_rawdata_paths = getNameFolds(path_dir);
+rawdata = load_rawdata(fullfile(path_dir,target_rawdata_paths{1})); 
+
+% rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{63})); 
 % rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{61})); 
 % rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{43})); 
 % index 9 also available
@@ -99,7 +104,7 @@ sdf(gcf,'sj2')
 
 figure
 % subplot(3,2,2:2:4)
-plot(estloc(:,1),estloc(:,2),'xr-','MarkerSize',8)
+plot(estloc(:,1),estloc(:,2),'xm-','MarkerSize',8)
 xlabel('x (m)');
 ylabel('y (m)');
 % ylim([-10 50])
@@ -112,7 +117,7 @@ set(gcf,'units','points','position',[1300,500,800,600])
 sdf(gcf,'sj2')
 
 print -clipboard -dbitmap
-print -depsc2 eps/18times_repeat_circle_pdr.eps
+% print -depsc2 eps/18times_repeat_circle_pdr.eps
 return
 %% draw v.01
 figure

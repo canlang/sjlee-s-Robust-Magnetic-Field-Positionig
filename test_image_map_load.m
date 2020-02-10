@@ -6,7 +6,7 @@
 % imshow(A,RA);
 % zero point (20, 659), 1/20 scaled image
 
-A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
+A = imread('map/N1-7F.png','BackgroundColor',[1 1 1]);
 
 xWorldLimits = [-1 1650/20];
 yWorldLimits = [-1 660/20];

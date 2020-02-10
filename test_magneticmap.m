@@ -21,14 +21,16 @@ clear; close all;
 % y = data1.loc_y;
 % z = vecnorm(lM,2,2);
 %%
-load('mats/magmap-n1-2f-0.6p.mat');
+% load('mats/magmap-n1-2f-0.6p.mat');
+load('mats/magmap-ki-1f-0.6p.mat');
 x = map(:,1);
 y = map(:,2);
 lM = map(:,3:5);
 % lM = [data1.mag_x,data1.mag_y,data1.mag_z];
 % x = data1.loc_x;
 % y = data1.loc_y;
-z = vecnorm(lM,2,2);
+% z = vecnorm(lM,2,2);
+z = lM(:,3);
 %%
 [X,Y,Z] = xyz2grid(x,y,z);
 % plot(loc_x,loc_y,'.')

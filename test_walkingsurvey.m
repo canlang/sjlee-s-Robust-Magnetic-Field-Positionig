@@ -36,21 +36,74 @@ clear all
 % radiomap_index = [64];          % south-direction
 
 %% N1 2F (grid open space)
-path_coord = cell(1,9);
-for i = 1:9
-    path_coord{i}.x = [38,56];
-    path_coord{i}.y = 7+0.7*i;
-end
-radiomap_index = 65:(65+8);             % n1 2f east
+% path_coord = cell(1,9);
+% for i = 1:9
+%     path_coord{i}.x = [38,56];
+%     path_coord{i}.y = 7+0.7*i;
+% end
+% radiomap_index = 65:(65+8);             % n1 2f east
 
 %% KI 1F
+parentsFolders = getNameFolds('rawdata/ki*');
+b = cell(length(parentsFolders),1);
 
+for i = 1:length(parentsFolders)
+     a = getNameFolds(sprintf('rawdata/%s',parentsFolders{i}));
+     b{i} = cellfun(@(x) sprintf('rawdata/%s/%s',parentsFolders{i},x), a,...
+         'UniformOutput',false);
+%      b = what(sprintf('rawdata/%s/%s',parentsFolders{i},a{1}));
+end
+b = cat(1,b{:});       % all path info from rawdata (radiomap survey lines)
 
-for i = 1:length(radiomap_index)
-    target_rawdata_paths = getNameFolds('rawdata/ki*');
-    rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{radiomap_index(i)}));
+path_coord = cell(1,length(b));
+for i = 1:3
+    path_coord{i}.x = [3,44.4];
+    path_coord{i}.y = 7.5+0.6*(i-1);
+end
+for i = 4:4+13
+    path_coord{i}.x = [3,9.8];
+    path_coord{i}.y = 7.5+0.6*(i-1);
+end
+for i = 18:18+1
+    path_coord{i}.x = 3+0.9*(i-18);
+    path_coord{i}.y = [17.2,29.8];
+end
+for i = 20:20+1
+    path_coord{i}.x = [3.9,7.6];
+    path_coord{i}.y = 30.4+0.6*(i-20);
+end
+for i = 22:22+4
+    path_coord{i}.x = [5.7,10.2+1.8*(i-22)];
+    path_coord{i}.y = 31.5+0.6*(i-22);
+end
+for i = 27:27+1
+    path_coord{i}.x = [5.7,21.9];
+    path_coord{i}.y = 34.5+0.6*(i-27);
+end
+for i = 29:29+3
+    path_coord{i}.x = [16.5,21.9];
+    path_coord{i}.y = 35.7+0.6*(i-29);
+end
+for i = 33:33+11
+    path_coord{i}.x = [31.8,44.4];
+    path_coord{i}.y = 9.3+0.6*(i-33);
+end
+for i = 45:45+30
+    path_coord{i}.x = [31.8,50.7];
+    path_coord{i}.y = 16.5+0.6*(i-45);
+end
+for i = 76:76+18
+    path_coord{i}.x = [21.9,50.7];
+    path_coord{i}.y = 35.1+0.6*(i-76);
+end
+%%
+% for i = 1:length(radiomap_index)
+for i = 1:length(b)
+%     target_rawdata_paths = getNameFolds('rawdata/ki*');
+%     rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{radiomap_index(i)}));
+    
 %     rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{i+t_input_idx}));
-
+    rawdata = load_rawdata(b{i});
 
     %% resample for synchronize
     rate = 2e-2;
@@ -102,4 +155,4 @@ for i = 1:length(radiomap_index)
 %         map = [map; remap];
 %     end
 end
-save(fullfile('mats',['magmap-n1-2f-',num2str(0.6),'p.mat']),'map')
+save(fullfile('mats',['magmap-ki-1f-',num2str(0.6),'p.mat']),'map')

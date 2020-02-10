@@ -8,25 +8,34 @@ video_flag = 0;
 % failure: 15,32,34,35,36
 % loop: 43,
 
-t_input_idx = 63;
+% t_input_idx = 63; ki
 % t_input_idx = 29;
 % t_input_idx = 36;
 
-switch t_input_idx
-    case 43
-        video_filename = 'm3axis_2d-space_pf_real-time-input_loop-traj';        %input index = 43;
-    otherwise
-        video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_6';%nonshifted input??
-end
+% switch t_input_idx
+%     case 43
+%         video_filename = 'm3axis_2d-space_pf_real-time-input_loop-traj';        %input index = 43;
+%     otherwise
+%         video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_6';%nonshifted input??
+% end
 
 % heading_noise = .01;        % heading noise candidates: .01, .50
 %%
-% map = magmap_construction('mats',.6);
+% (1)
+site_name = 'KI-1F';
+map = magmap_construction('mats',site_name,.1);
+lm.x = map(:,1);lm.y = map(:,2);
+lM = map(:,3:5);
+
+% (2)
+% load('mats/magmap-ki-1f-0.6p.mat');
 % lm.x = map(:,1);lm.y = map(:,2);
 % lM = map(:,3:5);
 
-data1 = readtable('sw_maps/dataset_ki_1f.csv');
-lM = [data1.mag_x,data1.mag_y,data1.mag_z];
+% (3)
+% data1 = readtable('sw_maps/dataset_ki_1f.csv');
+% lM = [data1.mag_x,data1.mag_y,data1.mag_z];
+% lm.x = data1.loc_x;lm.y = data1.loc_y;
 
 % INTERPOLATION
 % x = data1.loc_x;
@@ -57,15 +66,28 @@ lM = [data1.mag_x,data1.mag_y,data1.mag_z];
 % lm.x = map(:,1);lm.y = map(:,2);
 % lM = map(:,3:5);
 
-lm.x = data1.loc_x;lm.y = data1.loc_y;
-plot(lm.x,lm.y,'.')
+
+% plot(lm.x,lm.y,'.')
 %%
 % #1. old testing data
 % data2 = readtable('20171124 MagCoord3axisData.csv');
 % #2. new collected data (realistic tracking)
-target_rawdata_paths = getNameFolds('rawdata');
-rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{t_input_idx}));
+tr_idx = 3;
+device_name = 'MATE20pro';
+% device_name = 'S9';
 
+testfolder_name = sprintf('test-%s-%s',site_name,device_name);
+% testfolder_name = 'test-KI-1F-S9';
+test_path = sprintf('rawdata/%s',testfolder_name);
+target_rawdata_paths = getNameFolds(test_path);
+rawdata = load_rawdata(fullfile(test_path,target_rawdata_paths{tr_idx}));
+
+% test_data_paths = dir('rawdata/test-ki-1f-iphone/*.csv');
+% rawdata = load_rawdata(test_data_paths(tr_idx),'iPhone');
+% 
+% plot(rawdata.acc_norm)
+% hold on
+% plot(rawdata1.acc_norm)
 %% resample for synchronize
 rate = 2e-2;
 processed_data = resample_rawdata(rawdata,rate);
@@ -102,7 +124,8 @@ std_euler = stdfilt(unwrap(euler(:,3)));
 
 %% inbound & outbound
 site_name = 'KI-1F';
-layout = loadjson(sprintf('map/%s.json',site_name));
+layout = jsondecode(fileread(sprintf('map/%s.json',site_name)));
+% layout = loadjson(sprintf('map/%s.json',site_name));
 % layout = loadjson('map/KI-1F.json');
 
 x = layout.in(:,1);
@@ -132,7 +155,7 @@ hold on
 plot(lm.x,lm.y,'.','MarkerSize', 10)
 % plot(lM(:,1),lM(:,2),'.','MarkerSize', 10)
 % for save eps
-legend('reference point')
+% legend('reference point')
 sdf(gcf,'sj2')
 % print -depsc2 env_setting.eps
 
@@ -140,8 +163,9 @@ sdf(gcf,'sj2')
 % xlim([8 83])
 % ylim([0 30])
 % set(gcf,'units','points','position',[700,500,1500,700])
-plot(shp,'FaceAlpha',.5,'EdgeColor','r')
 
+plot(shp,'FaceAlpha',.1,'EdgeColor','r')
+legend('reference point','layout area')
 
 %%
 % initialize particle
@@ -158,7 +182,8 @@ ps.y = lm.y(rand_idx);
 % 3. initial area
 % ps.x = data2.coord_x(1)+random('normal',0,5,n,1);
 % ps.y = data2.coord_y(1)+random('normal',0,5,n,1);
-% ps.y = 15+random('normal',0,5,n,1);
+% ps.x = 45+random('normal',0,1,n,1);
+% ps.y = 45+random('normal',0,1,n,1);
 
 ps.sl = ones(n,1)*.7;
 ps.mag_heading = random('Uniform', 0,2*pi,n,1);
@@ -221,16 +246,16 @@ for i = 1:length(tM)
     
     ps.sl = .7 + random('normal',0,.5,n,1);
     
-    mu = [0,0];
-%     sigma = [0.10409786, 0.13461109; 0.13461109, 0.29744705];
-%     sigma = [1.43724175 -0.93884837;-0.93884837  0.74606608];
-    sigma = [0.02765426 0;0  0.04181993];
-    mvnRand = mvnrnd(mu,sigma,n);
-    ps.x = ps.x + cos(ps.mag_heading+euler(i,3)+1*pi/2).*ps.sl+ mvnRand(:,1);
-    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)+1*pi/2).*ps.sl+ mvnRand(:,2);
+%     mu = [0,0];
+% %     sigma = [0.10409786, 0.13461109; 0.13461109, 0.29744705];
+% %     sigma = [1.43724175 -0.93884837;-0.93884837  0.74606608];
+%     sigma = [0.02765426 0;0  0.04181993];
+%     mvnRand = mvnrnd(mu,sigma,n);
+%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)+1*pi/2).*ps.sl+ mvnRand(:,1);
+%     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)+1*pi/2).*ps.sl+ mvnRand(:,2);
 
-%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
-%     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
+    ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
+    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
 
 %     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl;
 %     ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl;
@@ -417,15 +442,26 @@ ylabel('Relative \psi (rad)')
 
 subplot(313)
 % stem(wrapTo2Pi(ps.mag_heading),ones(n,1))
-histogram(wrapTo2Pi(ps.mag_heading),n/2)
-xlabel('Latest Time Magnetic Heading')
-xlim([0 2*pi])
-set(gca,'XTick',0:pi/2:2*pi) 
-set(gca,'XTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'})
+
+% histogram(wrapTo2Pi(ps.mag_heading),n/2)
+% xlabel('Latest Time Magnetic Heading')
+% xlim([0 2*pi])
+% set(gca,'XTick',0:pi/2:2*pi) 
+% set(gca,'XTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'})
+
+turn_thr = .15;
+[~,turn_locs] = findpeaks(std_euler,'MinPeakHeight',turn_thr);
+findpeaks(std_euler,'MinPeakHeight',turn_thr)
 
 set(gcf,'units','points','position',[800,100,900,700])
 sdf(gcf,'sj')
 
+%%
+gt_filename = sprintf('est-result/ki-gt-s%d.json',tr_idx);
+gt = jsondecode(fileread(gt_filename));
+% converged_est = [est(converge_idx:end,1), est(converge_idx:end,2)];
+est_testpts = [est(turn_locs,1),est(turn_locs,2)];
+diag(pdist2(gt(2:end,:), est_testpts))
 return
 %% for papaer figure (without map image)
 close all
@@ -454,8 +490,8 @@ grid minor
 % set(gca,'ytick',[])
 xlabel('x (m)');
 ylabel('y (m)');
-xlim([0.6900   34.1538]);
-ylim([-15.0702   10.5512]);
+% xlim([0.6900   34.1538]);
+% ylim([-15.0702   10.5512]);
 
 set(gcf,'units','points','position',[500,500,800,600])
 sdf(gcf,'sj2')
@@ -496,18 +532,10 @@ sdf(gcf,'sj2')
 
 
 %% local functions -----------------------------------------------------------------
-% 1st local function
-function nameFolds = getNameFolds(pathFolder)
-d = dir(pathFolder);
-isub = [d(:).isdir]; %# returns logical vector
-nameFolds = {d(isub).name}';
-nameFolds(ismember(nameFolds,{'.','..'})) = [];
-% nameFolds(~cellfun(@isempty,regexp(nameFolds, '\d{6}'))) = [];
-end
-
-% 2nd local function
+% 1. local function
 function data = resample_rawdata(rawdata,rate)
 % Var1 : 3 vectors of Accelerometer, Var2: norm vector of Acc.
+% seconds(rawdata.acc(:,2)/1e9)
 T_acc = timetable(seconds(rawdata.acc(:,2)/1e9),rawdata.acc(:,3:5),rawdata.acc_norm,...
     'VariableNames',{'acc','acc_norm'});
 % Var1 : 3 vectors of gyroscope
@@ -515,10 +543,11 @@ T_gyr = timetable(seconds(rawdata.gyr(:,2)/1e9),rawdata.gyr(:,3:5),...
     'VariableNames',{'gyr'});
 T_mag = timetable(seconds(rawdata.mag(:,2)/1e9),rawdata.mag(:,3:5),...
     'VariableNames',{'mag'});
-T_acc = sortrows(T_acc);
+T_acc = sortrows(T_acc);    
 T_gyr = sortrows(T_gyr);
 T_mag = sortrows(T_mag);
 
+% TT = synchronize(T_acc,T_gyr,T_mag,'regular','nearest','TimeStep',seconds(rate));
 TT = synchronize(T_acc,T_gyr,T_mag,'regular','linear','TimeStep',seconds(rate));
 
 data.Accelerometer = TT.acc;

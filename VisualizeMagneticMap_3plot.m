@@ -23,7 +23,7 @@ for i=1:3
     zg = griddata(x,y,z,xg,yg);         % 2. griddata() : INTERPOLATION
     [X,Y,Z] = xyz2grid(xg,yg,zg);
 
-    A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
+    A = imread('map/N1-7F.png','BackgroundColor',[1 1 1]);
 
     xWorldLimits = [-1 1650/20];
     yWorldLimits = [-1 660/20];

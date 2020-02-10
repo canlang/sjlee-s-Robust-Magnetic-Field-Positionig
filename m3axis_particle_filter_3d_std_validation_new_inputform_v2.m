@@ -8,7 +8,8 @@ video_flag = 0;
 % failure: 15,32,34,35,36
 % loop: 43,
 
-t_input_idx = 64;
+t_input_idx = 4;
+% t_input_idx = 64;     right heading move: have to modify yaw_offset
 % t_input_idx = 29;
 % t_input_idx = 36;
 
@@ -25,12 +26,22 @@ map = magmap_construction('mats',.6);
 lm.x = map(:,1);lm.y = map(:,2);
 lM = map(:,3:5);
 
+% (2)
+% load(sprintf('mats/magmap-%s-0.6p.mat',site_name));
+% lm.x = map(:,1);lm.y = map(:,2);
+% lM = map(:,3:5);
+
+
 %%
 % #1. old testing data
 % data2 = readtable('20171124 MagCoord3axisData.csv');
 % #2. new collected data (realistic tracking)
 target_rawdata_paths = getNameFolds('rawdata');
 rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{t_input_idx}));
+
+% tr_idx = 1;
+% test_data_paths = dir('rawdata/test-n1-7f-iphone/*.csv');
+% rawdata = load_rawdata(test_data_paths(tr_idx),'iPhone');
 
 %% resample for synchronize
 rate = 2e-2;
@@ -163,8 +174,8 @@ switch video_flag
         writeVideo(v,frame);
 end
 
-yaw_offset = pi/2;       % pi/2
-% yaw_offset = 0;       % pi/2
+% yaw_offset = pi/2;       % pi/2
+yaw_offset = 0;       % pi/2
 
 for i = 1:length(tM)
     % ================ PREDICTION
@@ -225,6 +236,10 @@ for i = 1:length(tM)
     R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),...
         -ps.mag_heading,'UniformOutput',false); 
     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+    
+%     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])*rotMat(:,:,i),...
+%         ps.mag_heading,'UniformOutput',false); 
+%     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
 
 %     R = arrayfun(@(x) eulerAnglesToRotation3d(x,-euler(1,2),-euler(1,1))...
 %         ,-euler(1,3)-ps.mag_heading,'UniformOutput',false);

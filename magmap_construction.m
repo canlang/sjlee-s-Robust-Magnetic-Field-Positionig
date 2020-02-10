@@ -1,14 +1,24 @@
-function map = magmap_construction(mypath,d)
+function map = magmap_construction(mypath,site_name,d)
 % d: interval
 % addpath(genpath(path));
-if exist(fullfile(mypath,['magmap',num2str(d),'.mat']), 'file') == 2
-    load(fullfile(mypath,['magmap',num2str(d),'.mat']), 'map')    
+if exist(fullfile(mypath,['magmap-',site_name,num2str(d),'a.mat']), 'file') == 2
+    load(fullfile(mypath,['magmap-',site_name,num2str(d),'a.mat']), 'map')    
 else
-    data1 = readtable('batch.csv');
-    lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
-    % INTERPOLATION
-    x = data1.x;
-    y = data1.y;
+    
+    switch site_name
+        case 'N1-7F'
+            data1 = readtable('batch.csv');    
+            lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
+            % INTERPOLATION
+            x = data1.x;
+            y = data1.y;
+        case 'KI-1F'
+            data = load(sprintf('mats/magmap-%s-0.6p.mat',site_name));
+            lm.x = data.map(:,1);lm.y = data.map(:,2);
+            lM = data.map(:,3:5);
+            x = lm.x;
+            y = lm.y;
+    end
     newlM = [];
     for i=1:3
         z = lM(:,i);
@@ -31,6 +41,6 @@ else
     end
     data1 = array2table(newlM(:,1:2), 'VariableNames',{'x','y'});
     map = [data1.x, data1.y, newlM(:,3:end)];
-    save(fullfile(mypath,['magmap',num2str(d),'.mat']),'map')
+    save(fullfile(mypath,['magmap-',site_name,num2str(d),'a.mat']),'map')
 end
 
