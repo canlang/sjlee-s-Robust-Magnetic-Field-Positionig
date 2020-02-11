@@ -4,7 +4,7 @@ data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 % INTERPOLATION
-interp_interval = .7;
+interp_interval = .8;
 x = data1.x;
 y = data1.y;
 newlM = [];
@@ -35,7 +35,8 @@ lM = newlM(:,3:end);
 % nParticleCandidate = 2000:100:3000;
 % nRepeat = 500;
 nParticleCandidate = 1000:1000:3000;
-nRepeat = 100;
+% % nParticleCandidate = [1000 2000];
+nRepeat = 10;
 
 % errMat = zeros(length(nParticleCandidate),nRepeat);
 % stdMat = zeros(length(nParticleCandidate),nRepeat);
@@ -132,11 +133,14 @@ for k = 1:length(nParticleCandidate)
         end
         
         err_std = std(err,0,2);
-        est_err = sqrt(sum((est(:,1:2)-[data2.coord_x data2.coord_y]).^2,2));
+        est_err = sqrt(sum((est(:,1:2)-[data2.coord_x (data2.coord_y+.2)]).^2,2));
         
         cIdx = find(err_std < 2,1);
         convIndexes(k,j) = cIdx;
-        errMat{k,j} = est_err(cIdx:end);
+        if cIdx<(length(data2.coord_x)/2)
+            errMat{k,j} = est_err(cIdx:end);
+        end
+        
 %         errMat{k,j} = est_err;
         
         
@@ -160,7 +164,7 @@ subplot(1, 3, [2 3])
 mean_err = zeros(length(nParticleCandidate),1);
 
 hold on
-linS = {'--','-.','-'};
+linS = {'--','-.','-',':','--'};
 for i = 1:length(nParticleCandidate)
     h = cdfplot(cell2mat(errMat(i,:)'));
     set(h,'lineStyle',linS{i})
