@@ -4,7 +4,7 @@ data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 
-A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
+A = imread('map/N1-7F.png','BackgroundColor',[1 1 1]);
 
 xWorldLimits = [-1 1650/20];
 yWorldLimits = [-1 660/20];
