@@ -1,9 +1,9 @@
 
-Nloop = 10;
+Nloop = 100;
 
-% intp = [.1, .2, .3, .5, .8, 1.0, 1.2];
+intp = [.1, .2, .3, .5, .8, 1.0, 1.2];
 % intp = [.2, .3, .5, .8, 1.0, 1.2];
-intp = [.8];
+% intp = [.8];
 errs = cell(Nloop,length(intp));
 
 for j=1:length(intp)

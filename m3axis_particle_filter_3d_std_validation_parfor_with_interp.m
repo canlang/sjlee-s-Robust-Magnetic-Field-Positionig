@@ -4,7 +4,7 @@ data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 % INTERPOLATION
-interp_interval = .8;
+interp_interval = .1;
 x = data1.x;
 y = data1.y;
 newlM = [];
@@ -36,7 +36,7 @@ lM = newlM(:,3:end);
 % nRepeat = 500;
 nParticleCandidate = 1000:1000:3000;
 % % nParticleCandidate = [1000 2000];
-nRepeat = 10;
+nRepeat = 100;
 
 % errMat = zeros(length(nParticleCandidate),nRepeat);
 % stdMat = zeros(length(nParticleCandidate),nRepeat);
@@ -179,6 +179,8 @@ set(0,'DefaultAxesColorOrder',brewermap(3,'Set1'))
 set(gcf,'units','points','position',[200,500,1100,500])
 sdf(gcf,'sj3')
 tightfig(gcf)
+
+save(sprintf('est-result/n1-7f-parfor-%s.mat',num2str(interp_interval)),'convIndexes','errMat','nParticleCandidate')
 return
 %%
 % plot(nParticleCandidate,mean(errMat,2),'x-')
