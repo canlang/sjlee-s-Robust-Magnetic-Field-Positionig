@@ -6,6 +6,9 @@ intp = [.1, .2, .3, .5, .8, 1.0, 1.2];
 % intp = [.2, .3, .5, .8, 1.0, 1.2];
 % intp = [.8];
 errs = cell(Nloop,length(intp));
+trj_idx = 3;
+device_name = 'S9';
+site_name = 'KI-1F';
 
 for j=1:length(intp)
     Nfailure = 0;
@@ -13,7 +16,7 @@ for j=1:length(intp)
     Dintp = intp(j);
     parfor i=1:Nloop
         close all
-        err = ILoA('KI-1F','S9',2,Dintp,true);
+        err = ILoA('KI-1F','S9',trj_idx,Dintp,true);
         %%    
         if sum(err<5)>length(err)/2
             % disp converged!
@@ -27,6 +30,7 @@ for j=1:length(intp)
     all_errs = errs{j,:};
     MED = mean(rmoutliers(all_errs));
     fprintf('GeoMapInt: %.1f, Convergence rate: %.1f, MED: %.2f\n'...
-    , intp(j), Nsuccess/Nloop, MED);
+    , intp(j), Nsuccess/Nloop*100, MED);
     % return
 end
+save(sprintf('est-result/%s-s%d-%s-errs.mat',site_name,trj_idx,device_name),'errs')
