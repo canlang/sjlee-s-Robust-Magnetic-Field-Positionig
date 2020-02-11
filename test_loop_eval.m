@@ -1,7 +1,8 @@
 
 Nloop = 1;
 
-intp = [.1, .2, .3, .5, .8, 1.0, 1.2];
+% intp = [.1, .2, .3, .5, .8, 1.0, 1.2];
+intp = [.6 .8, 1.0, 1.2];
 errs = cell(Nloop,length(intp));
 
 for j=1:length(intp)
@@ -9,7 +10,7 @@ for j=1:length(intp)
     Nsuccess = 0;
     for i=1:Nloop
         close all
-        err = ILoA('KI-1F','S9',3,intp(1),true);
+        err = ILoA('KI-1F','S9',1,intp(j),true);
         %%    
         if sum(err<5)>length(err)/2
             % disp converged!

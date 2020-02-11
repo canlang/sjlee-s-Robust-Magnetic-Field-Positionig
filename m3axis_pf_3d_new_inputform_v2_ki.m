@@ -23,7 +23,7 @@ video_flag = 0;
 %%
 % (1)
 site_name = 'KI-1F';
-map = magmap_construction('mats',site_name,.1);
+map = magmap_construction('mats',site_name,.6);
 lm.x = map(:,1);lm.y = map(:,2);
 lM = map(:,3:5);
 
@@ -72,9 +72,9 @@ lM = map(:,3:5);
 % #1. old testing data
 % data2 = readtable('20171124 MagCoord3axisData.csv');
 % #2. new collected data (realistic tracking)
-tr_idx = 3;
-device_name = 'MATE20pro';
-% device_name = 'S9';
+tr_idx = 1;
+% device_name = 'MATE20pro';
+device_name = 'S9';
 
 testfolder_name = sprintf('test-%s-%s',site_name,device_name);
 % testfolder_name = 'test-KI-1F-S9';

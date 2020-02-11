@@ -1,5 +1,5 @@
 function err = ILoA(site_name,device_name,tr_idx,intp_intv,vis_flag)
-% purpose: convert the localization function
+% purpose: convert the localization function - for evaluation loop
 
 %%
 map = magmap_construction('mats',site_name,intp_intv);
@@ -45,8 +45,6 @@ std_euler = stdfilt(unwrap(euler(:,3)));
 %% inbound & outbound
 site_name = 'KI-1F';
 layout = jsondecode(fileread(sprintf('map/%s.json',site_name)));
-% layout = loadjson(sprintf('map/%s.json',site_name));
-% layout = loadjson('map/KI-1F.json');
 
 x = layout.in(:,1);
 y = layout.in(:,2);
@@ -78,12 +76,6 @@ if vis_flag
     % for save eps
     % legend('reference point')
     sdf(gcf,'sj2')
-    % print -depsc2 env_setting.eps
-
-    % axis equal
-    % xlim([8 83])
-    % ylim([0 30])
-    % set(gcf,'units','points','position',[700,500,1500,700])
 
     plot(shp,'FaceAlpha',.1,'EdgeColor','r')
     legend('reference point','layout area')
@@ -109,9 +101,8 @@ ps.y = lm.y(rand_idx);
 
 ps.sl = ones(n,1)*.7;
 ps.mag_heading = random('Uniform', 0,2*pi,n,1);
-% ps.phy_heading = random('Uniform', 0,2*pi,n,1);
 ps.prob = ones(n,1)*(1/n);
-% ps.stlng = ones(n,1) + random('Uniform', -.1,.1,n,1);
+
 
 if vis_flag
     hold on 
@@ -124,17 +115,23 @@ if vis_flag
     hold off
 end
 
-% tM = (R*tM')';
-% tM = (R*tM')'-25;
-% 25 offset meaning TestData shift: because magnetometer's calibration not matched
 tM = processed_data.Magnetometer(locs,:);
 
-% test result matrix
 est = zeros(length(tM),3);
 %%
 
 for i = 1:length(tM)
-    % ================ PREDICTION   
+    % ================ PREDICTION 
+    hN = .03;      % heading noise value
+    if i>1
+%         Halpha = pi-est(i-1,3);
+        Halpha = 0;
+        ps.mag_heading = ps.mag_heading+random('normal',Halpha,hN,n,1);     % candidate, .08
+    else
+%     ps.mag_heading = ps.mag_heading+euler(i,3);
+        ps.mag_heading = ps.mag_heading+random('normal',0,hN,n,1);     % candidate, .08
+    end
+    
     ps.sl = .7 + random('normal',0,.5,n,1);
 
     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
@@ -189,7 +186,6 @@ for i = 1:length(tM)
         ps.x = lm.x(rand_idx);
         ps.y = lm.y(rand_idx);
         ps.mag_heading = random('Uniform', 0,2*pi,n,1);
-%         ps.phy_heading = random('Uniform', 0,2*pi,n,1);
         ps.prob = ones(n,1)*(1/n);
     else
         ps.prob = ps.prob./sum(ps.prob);
@@ -201,12 +197,11 @@ for i = 1:length(tM)
     ps.y = ps.y(resample_idx);
     ps.mag_heading = ps.mag_heading(resample_idx);
     ps.sl = ps.sl(resample_idx);
-    
+    est(i,:) = [mean(ps.x),mean(ps.y),circ_mean(ps.mag_heading)]; 
     if vis_flag
         set(h_ps,'XData',ps.x,'YData',ps.y)                             % ps result
         set(h_pm,'XData',mean(ps.x),'YData',mean(ps.y));
-        drawnow
-        est(i,:) = [mean(ps.x),mean(ps.y),circ_mean(ps.mag_heading)]; 
+        drawnow        
     end
 end
 if vis_flag

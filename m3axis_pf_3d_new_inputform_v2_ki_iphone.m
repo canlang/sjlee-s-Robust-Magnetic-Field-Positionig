@@ -6,7 +6,7 @@ video_flag = 0;
 
 % site_name = 'N1-7F';
 site_name = 'KI-1F';
-tr_idx = 3;
+tr_idx = 1;
 %%
 % (1)
 map = magmap_construction('mats',site_name,.6);
