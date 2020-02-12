@@ -1,12 +1,12 @@
 
-Nloop = 100;
+Nloop = 10;
 
 % persistent intp;
 intp = [.1, .2, .3, .5, .8, 1.0, 1.2];
 % intp = [.2, .3, .5, .8, 1.0, 1.2];
 % intp = [.8];
 errs = cell(Nloop,length(intp));
-trj_idx = 3;
+trj_idx = 1;
 device_name = 'S9';
 site_name = 'KI-1F';
 

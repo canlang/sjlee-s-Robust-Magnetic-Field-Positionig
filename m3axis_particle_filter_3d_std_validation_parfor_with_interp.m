@@ -4,7 +4,7 @@ data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 % INTERPOLATION
-interp_interval = 1.;
+interp_interval = .8;
 x = data1.x;
 y = data1.y;
 newlM = [];
