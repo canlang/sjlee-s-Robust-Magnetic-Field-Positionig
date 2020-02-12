@@ -4,7 +4,7 @@ data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 % INTERPOLATION
-interp_interval = .1;
+interp_interval = 1.;
 x = data1.x;
 y = data1.y;
 newlM = [];
@@ -177,7 +177,7 @@ xlabel('Error distance (m)')
 set(0,'DefaultAxesColorOrder',brewermap(3,'Set1'))
 
 set(gcf,'units','points','position',[200,500,1100,500])
-sdf(gcf,'sj3')
+% sdf(gcf,'sj3')
 tightfig(gcf)
 
 save(sprintf('est-result/n1-7f-parfor-%s.mat',num2str(interp_interval)),'convIndexes','errMat','nParticleCandidate')
