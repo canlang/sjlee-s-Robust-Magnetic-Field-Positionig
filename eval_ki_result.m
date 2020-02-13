@@ -20,7 +20,7 @@ disp('MED (m) /precision (%)')
 N = length(intp_candi);
 % N = 3;
 % set(0,'DefaultAxesColorOrder',brewermap(N,'Dark2'))
-set(0,'DefaultAxesColorOrder',brewermap(N,'Blues'))
+set(0,'DefaultAxesColorOrder',brewermap(N,'Greys'))
 figure;
 hold on
 
@@ -30,7 +30,7 @@ for i=fliplr(1:size(errs,1))
     all_err = vertcat(tempErrCell{:});
     
     h = cdfplot((all_err));       % draw N=2000
-    if intp_candi(i) == .8
+    if intp_candi(i) == 1
         set(h,'LineWidth',2,'Color','r')
     end
     fprintf('%.2f / %d \n', mean(terr), precision_rate(i));
