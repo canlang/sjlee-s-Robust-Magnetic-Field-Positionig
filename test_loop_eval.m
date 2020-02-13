@@ -5,7 +5,7 @@ Nloop = 100;
 intp = [.1, .2, .3, .5, .8, 1.0, 1.2];
 % intp = [.2, .3, .5, .8, 1.0, 1.2];
 % intp = [.8];
-errs = cell(Nloop,length(intp));
+errs = cell(length(intp),Nloop);
 trj_idx = 1;
 device_name = 'S9';
 site_name = 'KI-1F';
@@ -24,6 +24,7 @@ for j=1:length(intp)
             errs{j,i} = err;
         else
             Nfailure = Nfailure+1;
+            errs{j,i} = err;
             % disp fail!
         end
     end
