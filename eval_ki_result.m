@@ -1,16 +1,21 @@
 clearvars; close all
 
 intp_candi = [.1,.2,.3,.5,.8,1,1.2];
-trj_idx = 1;
+trj_idx = 3;
 device_name = 'S9';
 site_name = 'KI-1F';
 
 filename = sprintf('est-result/%s-s%d-%s-errs.mat'...
     ,site_name,trj_idx,device_name);
 load(filename)
-errs(8:10,:) = [];
+errs(8:end,:) = [];
 
-MED_mat = cellfun(@mean, errs);
+if trj_idx == 1
+    MED_mat = cellfun(@mean, errs);
+else
+    MED_mat = cellfun(@(x) mean(x(3:end)), errs);
+end
+
 true_pos_thr = 3;
 true_pos = MED_mat<true_pos_thr;
 
@@ -26,18 +31,22 @@ hold on
 
 for i=fliplr(1:size(errs,1))
     terr = MED_mat(i,true_pos(i,:));
-    tempErrCell = errs(i,true_pos(i,:))';
+    if trj_idx == 1
+        tempErrCell = errs(i,true_pos(i,:))';
+    else
+        tempErrCell = errs(i,true_pos(i,2:end))';
+    end
     all_err = vertcat(tempErrCell{:});
     
     h = cdfplot((all_err));       % draw N=2000
     if intp_candi(i) == 1
         set(h,'LineWidth',2,'Color','r')
     end
-    fprintf('%.2f / %d \n', mean(terr), precision_rate(i));
+    fprintf('%.2f / %3.f \n', mean(terr), precision_rate(i));
 end
 hold off
 
-xlim([0 5])
+% xlim([0 10])
 legend(arrayfun(@(x) num2str(x,'\\delta = %1.1f m'), fliplr(intp_candi)...
     ,'UniformOutput', false))
 
