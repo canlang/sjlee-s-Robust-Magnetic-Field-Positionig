@@ -204,6 +204,10 @@ for i = 1:length(tM)
         drawnow        
     end
 end
+
+turn_thr = .1;
+[~,turn_locs] = findpeaks(std_euler,'MinPeakHeight',turn_thr,'MinPeakDistance',5);
+    
 if vis_flag
     figure
     subplot(311)
@@ -231,11 +235,7 @@ if vis_flag
     % xlim([0 2*pi])
     % set(gca,'XTick',0:pi/2:2*pi) 
     % set(gca,'XTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'})
-
-    turn_thr = .1;
-    [~,turn_locs] = findpeaks(std_euler,'MinPeakHeight',turn_thr,'MinPeakDistance',5);
     findpeaks(std_euler,'MinPeakHeight',turn_thr,'MinPeakDistance',5)
-
 
     set(gcf,'units','points','position',[800,100,900,700])
     sdf(gcf,'sj')

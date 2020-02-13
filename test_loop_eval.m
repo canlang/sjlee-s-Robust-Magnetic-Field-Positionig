@@ -16,7 +16,7 @@ for j=1:length(intp)
     Dintp = intp(j);
     for i=1:Nloop
         close all
-        err = ILoA('KI-1F','S9',trj_idx,Dintp,true);
+        err = ILoA('KI-1F','S9',trj_idx,Dintp,false);
         %%    
         if sum(err<5)>length(err)/2
             % disp converged!
@@ -35,4 +35,3 @@ for j=1:length(intp)
 end
 % save(sprintf('est-result/%s-s%d-%s-errs.mat',site_name,trj_idx,device_name),'errs')
 %%
-% isempty(

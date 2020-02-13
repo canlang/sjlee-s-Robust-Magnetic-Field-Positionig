@@ -28,27 +28,29 @@ for j = fliplr(1:length(intp_candi))
         errs = errMat(i,true_pos(i,:));
         err = vertcat(errs{:});
 %         if i==3 && ismember(intp_candi(j),intp_candi)
-        if i==3
+        if i==2     % draw N=2000
+%             h = cdfplot(rmoutliers(err));       
+            h = cdfplot((err));       % draw N=2000
             if intp_candi(j) == .8
-                h = cdfplot(rmoutliers(err));       % draw N=2000
-                set(h,'LineWidth',2,'Color','r')
-            else
-                cdfplot(rmoutliers(err))       % draw N=2000
+                set(h,'LineWidth',4,'Color','r')
+%             else
+%                 cdfplot(rmoutliers(err))
             end
         end
-        fprintf('(N=%d) %.2f / %2.1f (MED/Precision)\n'...
+        fprintf('(N=%d) %.2f / %2.0f (MED/Precision)\n'...
             ,Nc(i), mean(err), v_precision*100);
     end
     
 end
 hold off
 
-legend(arrayfun(@(x) num2str(x,'\\delta - %1.1f m'), fliplr(intp_candi)...
+xlim([0 5])
+legend(arrayfun(@(x) num2str(x,'\\delta = %1.1f m'), fliplr(intp_candi)...
     ,'UniformOutput', false))
 
 % legend(arrayfun(@(x) num2str(x,'\\delta - %1.1f m'), [.1,.8,1.2]...
 %     ,'UniformOutput', false))
-% legend('Location','best')
+legend('Location','best')
 
-
+set(gcf,'units','points','position',[800,100,800,600])
 sdf(gcf,'sj2')
