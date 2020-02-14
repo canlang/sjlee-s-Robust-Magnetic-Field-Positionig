@@ -6,7 +6,7 @@ Nc = [1000,2000,3000];
 N = length(intp_candi);
 % N = 3;
 % set(0,'DefaultAxesColorOrder',brewermap(N,'Dark2'))
-set(0,'DefaultAxesColorOrder',brewermap(N,'Greys'))
+set(0,'DefaultAxesColorOrder',brewermap(N+3,'*Greys'))
 
 figure
 hold on
@@ -14,7 +14,7 @@ hold on
 re_errMat = zeros(length(Nc),length(intp_candi));
 re_preMat = re_errMat;
 
-for j = fliplr(1:length(intp_candi))
+for j = 1:length(intp_candi)
     filename = sprintf('est-result/n1-7f-parfor-%s.mat',num2str(intp_candi(j)));
     load(filename)
     gt_length = 63;
@@ -50,7 +50,8 @@ end
 hold off
 
 xlim([0 5])
-legend(arrayfun(@(x) num2str(x,'\\delta = %1.1f m'), fliplr(intp_candi)...
+xlabel('Error distance (m)')
+legend(arrayfun(@(x) num2str(x,'\\delta = %1.1f m'), intp_candi...
     ,'UniformOutput', false))
 
 % legend(arrayfun(@(x) num2str(x,'\\delta - %1.1f m'), [.1,.8,1.2]...
@@ -63,15 +64,39 @@ sdf(gcf,'sj3')
 %%
 close all
 % N = length(intp_candi);
-N = 3;
-set(0,'DefaultAxesColorOrder',brewermap(N,'Dark2'))
+N = 4;
+set(0,'DefaultAxesColorOrder',brewermap(N,'RdGy'))
 % set(0,'DefaultAxesColorOrder',brewermap(N,'Greys'))
 figure
 hold on
-plot(re_errMat(1,:),'-x','MarkerSize',15)
-plot(re_errMat(2,:),'-+','MarkerSize',15)
-plot(re_errMat(3,:),'-s','MarkerSize',15)
+plot(re_errMat(3,:),'s-','MarkerSize',15)
+plot(re_errMat(2,:),'x-.','MarkerSize',15)
+plot(re_errMat(1,:),'d--','MarkerSize',15)
 grid on
 ylim([0 .7])
+
+ylabel('MED (m)')
+xlabel('\delta (m)')
+xticklabels(arrayfun(@(x) num2str(x, '%1.1f'),intp_candi,'UniformOutput',false))
+legend('N=3000','N=2000','N=1000','Location','best')
+
 set(gcf,'units','points','position',[800,100,800,600])
 sdf(gcf,'sj3')
+
+figure
+% hold on
+% plot(re_errMat(3,:),'-x','MarkerSize',15)
+% plot(re_errMat(2,:),'-+','MarkerSize',15)
+% plot(re_errMat(1,:),'-s','MarkerSize',15)
+% grid on
+% ylim([0 .7])
+re_preMat2 = re_preMat';
+re_preMat2 = [re_preMat2(:,3),re_preMat2(:,2),re_preMat2(:,1)];
+bar(re_preMat2)
+set(gcf,'units','points','position',[800,1100,800,600])
+sdf(gcf,'sj3')
+
+ylabel('Precision (%)')
+xlabel('\delta (m)')
+xticklabels(arrayfun(@(x) num2str(x, '%1.1f'),intp_candi,'UniformOutput',false))
+legend('N=3000','N=2000','N=1000','Location','best')
