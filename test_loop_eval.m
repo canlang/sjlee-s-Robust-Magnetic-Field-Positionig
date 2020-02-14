@@ -1,13 +1,13 @@
 
 Nloop = 100;
 % persistent intp;
-intp = [.1, .2, .3, .5, .8, 1.0, 1.2];
+intp = [.2, .3, .5, .8, 1.0, 1.2];
 % intp = [.2, .3, .5, .8, 1.0, 1.2];
 % intp = [.8];
 
-for k=[1,3]    
+for k=1:3    
     errs = cell(length(intp),Nloop);
-    trj_idx = 1;
+    trj_idx = k;
     device_name = 'S9';
     site_name = 'KI-1F';
 
@@ -15,7 +15,7 @@ for k=[1,3]
         Nfailure = 0;
         Nsuccess = 0;
         Dintp = intp(j);
-        for i=1:Nloop
+        parfor i=1:Nloop
             close all
             err = ILoA('KI-1F','S9',trj_idx,Dintp,false);
             %%    
@@ -35,6 +35,6 @@ for k=[1,3]
         , intp(j), Nsuccess/Nloop*100, MED);
         % return
     end
-    save(sprintf('est-result/%s-s%d-%s-errs.mat',site_name,trj_idx,device_name),'errs')
+    save(sprintf('est-result/%s-s%d-%s-errs(%d).mat',site_name,trj_idx,device_name,Nloop),'errs')
 end
 %%

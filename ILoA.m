@@ -83,7 +83,7 @@ end
 
 %%
 % initialize particle
-n = 2000;
+n = 3000;
 % 1. only road
 rand_idx = randi(length(lm.x),n,1);
 ps.x = lm.x(rand_idx);
