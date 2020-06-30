@@ -43,7 +43,7 @@ rotMat = quatern2rotMat(quaternion(locs,:));
 std_euler = stdfilt(unwrap(euler(:,3)));
 [~,turn_locs] = findpeaks(std_euler,'MinPeakHeight',.3);
 %% inbound & outbound
-site_name = 'KI-1F';
+% site_name = 'KI-1F';
 layout = jsondecode(fileread(sprintf('map/%s.json',site_name)));
 
 x = layout.in(:,1);
@@ -83,7 +83,7 @@ end
 
 %%
 % initialize particle
-n = 3000;
+n = 2000;
 % 1. only road
 rand_idx = randi(length(lm.x),n,1);
 ps.x = lm.x(rand_idx);
@@ -170,6 +170,10 @@ for i = 1:length(tM)
     
     % COSINE
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
+
+    % related work: Horizontal & Vertical components, MaLoc, B_h,B_v
+    mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
+    mag_dist = mag_dist2';
 
 
     if ~all(mag_dist)

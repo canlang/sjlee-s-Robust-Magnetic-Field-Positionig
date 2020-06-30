@@ -128,7 +128,8 @@ for k = 1:length(nParticleCandidate)
     end
 end
 %%
-boxplot(errMat(5:end,:)',nParticleCandidate(5:end))
+% boxplot(errMat(5:end,:)',nParticleCandidate(5:end))
+boxplot(errMat(:,:)',nParticleCandidate(:))
 
 % boxplot(errMat3',nParticleCandidate3)
 % set(gca,'XTickLabelRotation',45)

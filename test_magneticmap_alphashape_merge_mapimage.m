@@ -2,21 +2,37 @@ clear; close all;
 
 addpath('xyz file operations')
 
-data1 = readtable('batch.csv');
 
-lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
+site_name = 'KI-1F';
+% site_name = 'N1-7F';
+A = imread(sprintf('map/%s.png',site_name),'BackgroundColor',[1 1 1]);
+
+switch site_name
+    case 'KI-1F'
+        map = magmap_construction('mats',site_name,.1);
+        x = map(:,1);
+        y = map(:,2);
+        lM = map(:,3:5);
+        
+        scale = 0.05;
+        xWorldLimits = [0 size(A,2)*scale];
+        yWorldLimits = [0 size(A,1)*scale];
+    case 'N1-7F'
+        data1 = readtable('batch.csv');
+        x = data1.x;
+        y = data1.y;
+        lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
+        
+        xWorldLimits = [-1 1650/20];
+        yWorldLimits = [-1 660/20];
+end
 % DATA SPLIT
-x = data1.x;
-y = data1.y;
 z = vecnorm(lM,2,2);    % L2 norm
-% z = data1.magnet_x;     % x component
-% z = data1.magnet_y;     % y component
-% z = data1.magnet_z;     % z component
+% z = lM(:,1);     % x component
+% z = lM(:,2);     % y component
+% z = lM(:,3);     % z component
 
 
-A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
-xWorldLimits = [-1 1650/20];
-yWorldLimits = [-1 660/20];
 RA = imref2d(size(A),xWorldLimits,yWorldLimits);
 imshow(flipud(A),RA);
 % axis image
@@ -24,13 +40,17 @@ axis xy
 
 hold on
 
+%%
 
 [X,Y,Z] = interpolation_by_alphashape(x,y,z);
-set(gca,'XTick',[]);
-set(gca,'YTick',[]);
-sdf(gcf,'sj4')
-print -depsc2 eps/alphashape.eps
 
+% When alpha shape draw (need modify function in interpolation_by_alphashape)
+% set(gca,'XTick',[]);
+% set(gca,'YTick',[]);
+% sdf(gcf,'sj4')
+% print -depsc2 eps/alphashape.eps
+
+%%
 % h = imagesc(X(1,:),Y(:,1),Z);
 % xlabel('x (m)')
 % ylabel('y (m)')
@@ -43,9 +63,9 @@ print -depsc2 eps/alphashape.eps
 % vq = F(X,Y);
 
 %%
-% h = contourf(X,Y,Z);
-% hcb = colorbar;
-% ylabel(hcb, 'L2 norm of Magnetic Field')
+h = contourf(X,Y,Z);
+hcb = colorbar;
+ylabel(hcb, 'L2 norm of Magnetic Field')
 % ylabel(hcb, 'X compoment of Magnetic Field')
 % ylabel(hcb, 'Y compoment of Magnetic Field')
 % ylabel(hcb, 'Z compoment of Magnetic Field')
@@ -77,13 +97,14 @@ YI = min(y):.5:max(y);
 
 % APPLY ALPHA SHAPE 
 shp = alphaShape(x,y);
-plot(shp,'EdgeColor','k')
-% plot(shp,'FaceAlpha',0.7,'EdgeAlpha',.7,'LineWidth',0.3)
-% plot(shp,'FaceColor','red','FaceAlpha',0.3,'LineWidth',0.3)
-% polyin = polyshape(shp.Points(:,1),shp.Points(:,2));
-% plot(polyin)
-
-legend('alphashape')
+shp.Alpha = .5;
+% plot(shp,'EdgeColor','k')
+% % plot(shp,'FaceAlpha',0.7,'EdgeAlpha',.7,'LineWidth',0.3)
+% % plot(shp,'FaceColor','red','FaceAlpha',0.3,'LineWidth',0.3)
+% % polyin = polyshape(shp.Points(:,1),shp.Points(:,2));
+% % plot(polyin)
+% 
+% legend('alphashape')
 
 % hline = findobj(gcf, 'type', 'line');
 % set(hline(1),'LineStyle','--')

@@ -3,12 +3,14 @@ clear; close all;
 
 % flag: Video save
 video_flag = 0;
+eps_save = 0;
+site_name = 'N1-7F';
 
-% success: 3(->path),4(<-path),6+,7+,8(loop-),9(loop+),10,11,12,13(-),14,16,17,18,19
+% success: 3(->path),4(<-path),6+,7+,8(loop-),9(loop+),10,11,12,13,14(-),15(-),16,17,18,19
 % failure: 15,32,34,35,36
 % loop: 43,
 
-t_input_idx = 4;
+t_input_idx = 11;
 % t_input_idx = 64;     right heading move: have to modify yaw_offset
 % t_input_idx = 29;
 % t_input_idx = 36;
@@ -22,7 +24,7 @@ end
 
 % heading_noise = .01;        % heading noise candidates: .01, .50
 %%
-map = magmap_construction('mats',.6);
+map = magmap_construction('mats',site_name,.6);
 lm.x = map(:,1);lm.y = map(:,2);
 lM = map(:,3:5);
 
@@ -30,6 +32,10 @@ lM = map(:,3:5);
 % load(sprintf('mats/magmap-%s-0.6p.mat',site_name));
 % lm.x = map(:,1);lm.y = map(:,2);
 % lM = map(:,3:5);
+
+% data1 = readtable('batch.csv');
+% lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
+% lm.x = data1.x;lm.y = data1.y;
 
 
 %%
@@ -78,7 +84,8 @@ std_euler = stdfilt(unwrap(euler(:,3)));
 % plot(processed_data.Time, std_euler)
 
 %% inbound & outbound
-layout = loadjson('map/N1-7F-HiRes2.json');
+% layout = loadjson('map/N1-7F-HiRes2.json');
+layout = jsondecode(fileread(sprintf('map/%s.json',site_name)));
 
 x = layout.in(:,1);
 y = layout.in(:,2);
@@ -194,17 +201,17 @@ for i = 1:length(tM)
     end
     
     ps.sl = .7 + random('normal',0,.5,n,1);
-    
+
     mu = [0,0];
 %     sigma = [0.10409786, 0.13461109; 0.13461109, 0.29744705];
 %     sigma = [1.43724175 -0.93884837;-0.93884837  0.74606608];
     sigma = [0.02765426 0;0  0.04181993];
     mvnRand = mvnrnd(mu,sigma,n);
-    ps.x = ps.x + cos(ps.mag_heading+euler(i,3)+yaw_offset).*ps.sl+ mvnRand(:,1);
-    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)+yaw_offset).*ps.sl+ mvnRand(:,2);
+%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)+yaw_offset).*ps.sl+ mvnRand(:,1);
+%     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)+yaw_offset).*ps.sl+ mvnRand(:,2);
 
-%     ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
-%     ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
+    ps.x = ps.x + cos(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
+    ps.y = ps.y + sin(ps.mag_heading+euler(i,3)).*ps.sl+ random('Uniform',-.1,.1,n,1);
 
 %     ps.x = ps.x + cos(ps.mag_heading+euler(i,3))*sl;
 %     ps.y = ps.y + sin(ps.mag_heading+euler(i,3))*sl;
@@ -233,13 +240,17 @@ for i = 1:length(tM)
 %         'UniformOutput',false); 
 %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
 %     (3) UPDATE FUNCTION candidate  
-    R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),...
-        -ps.mag_heading,'UniformOutput',false); 
-    rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+%     R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),...
+%         -ps.mag_heading,'UniformOutput',false); 
+%     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
     
 %     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])*rotMat(:,:,i),...
 %         ps.mag_heading,'UniformOutput',false); 
 %     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+    
+    R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]*(rotMat(:,:,i).')),ps.mag_heading,...
+        'UniformOutput',false); 
+    rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
 
 %     R = arrayfun(@(x) eulerAnglesToRotation3d(x,-euler(1,2),-euler(1,1))...
 %         ,-euler(1,3)-ps.mag_heading,'UniformOutput',false);
@@ -312,6 +323,7 @@ for i = 1:length(tM)
     
 %     est(i,:) = [mean(ps.x),mean(ps.y),mean(angdiff(ps.mag_heading,0))];
 %     est(i,:) = [mean(ps.x),mean(ps.y),mean(abs(angdiff(ps.mag_heading,0)))];        %x,y,heading
+%     est(i,:) = [mean(ps.x),mean(ps.y),circ_mean(ps.mag_heading-pi)]; 
     est(i,:) = [mean(ps.x),mean(ps.y),circ_mean(ps.mag_heading)]; 
     
 %     err(i,:) = pdist2([data2.coord_x(i),data2.coord_y(i)],[ps.x,ps.y]);
@@ -366,11 +378,17 @@ legend('\sigma>2','\sigma\leq2')
 % set(p.Edge, 'ColorBinding','interpolated', 'ColorData',cd)
 
 sdf(gcf,'sj')
-% print -depsc2 eps/18times_repeat_circle.eps
+if eps_save
+    eps_filename = sprintf('eps/%s.eps',target_rawdata_paths{t_input_idx});
+%     print -depsc2 eps/18times_repeat_circle.eps
+%     print -depsc2 eps_filename
+    print(gcf, '-depsc2', eps_filename)
+end
 
 %%
+% close all
 figure
-subplot(311)
+subplot(211)
 % (1)
 % histogram(wrapTo2Pi(ps.phy_heading))
 % xlabel('Physical Heading')
@@ -378,35 +396,73 @@ subplot(311)
 % set(gca,'XTick',0:pi/2:2*pi) 
 % set(gca,'XTickLabel',{'0','pi/2','pi','3pi/2','2pi'}) 
 % (2)
-plot(est(:,3))
-grid on
-ylim([-pi pi])
-set(gca,'YTick',-pi:pi/2:pi) 
-set(gca,'YTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi',}) 
-xlabel('input index')
-ylabel('Magnetic \Delta (rad)')
+plot(wrapTo2Pi(est(:,3)),'-')
 
-subplot(312)
+grid on
+% ylim([-pi pi])
+% set(gca,'YTick',-pi:pi/2:pi) 
+% set(gca,'YTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi',}) 
+
+ylim([0 2*pi])
+set(gca,'YTick',0:pi/2:2*pi) 
+set(gca,'YTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'}) 
+
+xlabel('input index')
+ylabel('\eta (rad)')
+
+subplot(212)
 plot(euler(:,3))
 grid on
 ylim([-pi pi])
 set(gca,'YTick',-pi:pi/2:pi) 
 set(gca,'YTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi',}) 
 xlabel('input index')
-ylabel('Relative \psi (rad)')
+ylabel('\Delta \psi (rad)')
 
-subplot(313)
-% stem(wrapTo2Pi(ps.mag_heading),ones(n,1))
-histogram(wrapTo2Pi(ps.mag_heading),n/2)
-xlabel('Latest Time Magnetic Heading')
-xlim([0 2*pi])
-set(gca,'XTick',0:pi/2:2*pi) 
-set(gca,'XTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'})
+% subplot(313)
+% % stem(wrapTo2Pi(ps.mag_heading),ones(n,1))
+% histogram(wrapTo2Pi(ps.mag_heading),n/2)
+% xlabel('Latest Time Magnetic Heading')
+% xlim([0 2*pi])
+% set(gca,'XTick',0:pi/2:2*pi) 
+% set(gca,'XTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'})
 
-set(gcf,'units','points','position',[800,100,900,700])
+set(gcf,'units','points','position',[800,100,900,500])
 sdf(gcf,'sj')
 
 return
+
+%%
+close all
+subplot(311)
+plot(euler(:,3),'b')
+grid on
+ylim([-pi pi])
+set(gca,'YTick',-pi:pi/2:pi) 
+set(gca,'YTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi',}) 
+% xlabel('input index')
+ylabel('\Delta \psi (rad)')
+
+subplot(312)
+plot(wrapTo2Pi(est(:,3)),'b-')
+grid on
+ylim([0 2*pi])
+set(gca,'YTick',0:pi/2:2*pi) 
+set(gca,'YTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'}) 
+% xlabel('input index')
+ylabel('\eta (rad)')
+
+subplot(313)
+plot(1:length(est),wrapTo2Pi(est(:,3))','bo')
+hold on
+polyplot(1:length(est),wrapTo2Pi(est(:,3))',1,'r','linewidth',4);
+legend('data','linear fit','location','southeast')
+xlabel('input index')
+ylabel('\eta')
+
+set(gcf,'units','points','position',[800,100,700,700])
+sdf(gcf,'sj')
+
 %% for papaer figure (without map image)
 close all
 err_std = std(err,0,2);

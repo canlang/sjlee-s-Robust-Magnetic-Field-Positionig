@@ -23,7 +23,7 @@ for i = 1:3
     test_seq_i = i;
     gt_filename = sprintf('est-result/ki-gt-s%d.json',test_seq_i);
     gt = jsondecode(fileread(gt_filename));
-    
+%     figure
     plot(gt(:,1),gt(:,2),'-')
     hold on
 

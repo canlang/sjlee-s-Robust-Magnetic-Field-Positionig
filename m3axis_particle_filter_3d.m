@@ -3,6 +3,10 @@ data1 = readtable('batch.csv');
 data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
+% Video save
+video_flag = chooseVideoSaveOrNot;
+% video_flag = false;
+
 
 A = imread('map/N1-7F.png','BackgroundColor',[1 1 1]);
 
@@ -23,9 +27,9 @@ ylabel('y (m)')
 % for save eps
 
 set(gcf,'units','points','position',[700,500,1000,350])
-tightfig
+% tightfig
 legend('reference point')
-% legend('reference point','location','best')
+% legend('reference point','location','best')   
 sdf(gcf,'sj4')
 print -depsc2 eps/env_setting.eps
 
@@ -82,8 +86,7 @@ tM = (R*tM')'-25;
 est = zeros(length(tM),3);
 err = zeros(length(tM),n);
 
-% Video save
-video_flag = false;
+
 if video_flag
     v = VideoWriter('m3axis_2d_pf_nonshiftedinput.mp4','MPEG-4');
     v.FrameRate = 10;
@@ -116,7 +119,13 @@ for i = 1:length(tM)
     mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
 %     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
 
-    if all(mag_dist) == 0
+    % related work: Horizontal & Vertical components, MaLoc, B_h,B_v
+%     mag_dist2 = mahal([vecnorm(tM(i,1:2),2), tM(i,3)], [vecnorm(lM(I,1:2),2,2), lM(I,3)]);
+%     bsxfun(@(x) mahal([vecnorm(tM(i,1:2),2), tM(i,3)],x), );
+    mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
+    mag_dist = mag_dist2';
+
+    if ~all(mag_dist)
         break
     end
     ps.prob = 1./(mag_dist);
@@ -164,7 +173,7 @@ for i = 1:length(tM)
     end
     ps_hist(i) = ps;
 end
-if video_flag close(v);end
+if video_flag; close(v);end
 %%
 figure
 [lineh, bandsh] = fanChart(1:size(err,1),err, 'mean', 10:10:90, ...

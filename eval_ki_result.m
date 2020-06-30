@@ -1,26 +1,25 @@
 clearvars; close all
 
-intp_candi = [.2,.3,.5,.8,1,1.2];
+intp_candi = [.1];
+% intp_candi = [.2,.3,.5,.8,1,1.2];
 % intp_candi = [.1,.2,.3,.5,.8,1,1.2];
 
 device_name = 'S9';
 site_name = 'KI-1F';
+fileFormat = 'est-result/%s-s%d-%s-errs(100)-n4000.mat';
 
 trj_idx = 1;
-filename = sprintf('est-result/%s-s%d-%s-errs(100).mat'...
-    ,site_name,trj_idx,device_name);
+filename = sprintf(fileFormat,site_name,trj_idx,device_name);
 load(filename)
 errs1 = errs;
 
 trj_idx = 2;
-filename = sprintf('est-result/%s-s%d-%s-errs(100).mat'...
-    ,site_name,trj_idx,device_name);
+filename = sprintf(fileFormat,site_name,trj_idx,device_name);
 load(filename)
 errs2 = errs;
 
 trj_idx = 3;
-filename = sprintf('est-result/%s-s%d-%s-errs(100).mat'...
-    ,site_name,trj_idx,device_name);
+filename = sprintf(fileFormat,site_name,trj_idx,device_name);
 load(filename)
 errs3 = errs;
 
@@ -47,7 +46,7 @@ set(0,'DefaultAxesColorOrder',brewermap(N,'Greys'))
 figure;
 hold on
 
-for i=fliplr(1:size(errs,1))
+for i=1:size(errs,1)
     terr = MED_mat(i,true_pos(i,:));
 %     if trj_idx == 1
 %         tempErrCell = errs(i,true_pos(i,:))';
@@ -62,12 +61,12 @@ for i=fliplr(1:size(errs,1))
     if intp_candi(i) == 1
 %         set(h,'LineWidth',2,'Color','r')
     end
-    fprintf('%.2f / %3.f \n', mean(terr), precision_rate(i));
+    fprintf('%.2f /%3.f \n', mean(terr), precision_rate(i));
 end
 hold off
 
 % xlim([0 10])
-legend(arrayfun(@(x) num2str(x,'\\delta = %1.1f m'), fliplr(intp_candi)...
+legend(arrayfun(@(x) num2str(x,'\\delta = %1.1f m'), intp_candi...
     ,'UniformOutput', false))
 
 % legend(arrayfun(@(x) num2str(x,'\\delta - %1.1f m'), [.1,.8,1.2]...

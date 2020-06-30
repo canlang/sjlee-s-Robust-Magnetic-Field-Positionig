@@ -1,10 +1,10 @@
 function map = magmap_construction(mypath,site_name,d)
 % d: interval
 % addpath(genpath(path));
-if exist(fullfile(mypath,['magmap-',site_name,num2str(d),'a.mat']), 'file') == 2
-    load(fullfile(mypath,['magmap-',site_name,num2str(d),'a.mat']), 'map')    
-else
-    
+filename = sprintf('magmap-%s-%.1fa.mat',site_name,d);
+if exist(fullfile(mypath,filename), 'file') == 2
+    load(fullfile(mypath,filename), 'map')    
+else    
     switch site_name
         case 'N1-7F'
             data1 = readtable('batch.csv');    
@@ -19,31 +19,39 @@ else
             x = lm.x;
             y = lm.y;
     end
-    newlM = [];
+    
+    XI = min(x):d:max(x);
+    YI = min(y):d:max(y);
+    [X,Y] = meshgrid(XI,YI);
+    shp = alphaShape(x,y);
+    fprintf('Creating radio map (alpha value=%.1f)\n',shp.Alpha);
+    
+    if strcmp(site_name,'KI-1F')
+        shp.Alpha = .6;
+    end
+    in = inShape(shp,X,Y);
+    xg = X(in);
+    yg = Y(in);
+    
+    newlM = zeros(sum(in,'all'), 5);
+    newlM(:,1:2) = [xg,yg];
     for i=1:3
         z = lM(:,i);
-        XI = min(x):d:max(x);
-        YI = min(y):d:max(y);
-        [X,Y] = meshgrid(XI,YI);
-        shp = alphaShape(x,y);
         
-        disp(shp.Alpha)
-        shp.Alpha = .6;
-        in = inShape(shp,X,Y);
-        xg = X(in);
-        yg = Y(in);
         zg = griddata(x,y,z,xg,yg,'nearest');         % 2. griddata() : INTERPOLATION
-        if isempty(newlM)
-            newlM = [xg,yg,zg];
-        else
-            newlM = [newlM,zg];
-            if ~isequal(newlM(:,1:2), [xg,yg])
-                disp 'error'
-            end
-        end
+        newlM(:,i+2) = zg;
+%         if isempty(newlM)
+%             newlM = [xg,yg,zg];
+%         else
+%             newlM = [newlM,zg];
+%             if ~isequal(newlM(:,1:2), [xg,yg])
+%                 disp 'error'
+%             end
+%         end
     end
     data1 = array2table(newlM(:,1:2), 'VariableNames',{'x','y'});
     map = [data1.x, data1.y, newlM(:,3:end)];
-    save(fullfile(mypath,['magmap-',site_name,num2str(d),'a.mat']),'map')
+    
+    save(fullfile(mypath,filename),'map')
 end
 

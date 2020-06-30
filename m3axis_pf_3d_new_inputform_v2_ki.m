@@ -72,7 +72,7 @@ lM = map(:,3:5);
 % #1. old testing data
 % data2 = readtable('20171124 MagCoord3axisData.csv');
 % #2. new collected data (realistic tracking)
-tr_idx = 1;
+tr_idx = 3;
 % device_name = 'MATE20pro';
 device_name = 'S9';
 
@@ -381,6 +381,7 @@ switch video_flag, case 1, close(v);end
 % return
 
 %%
+
 figure
 err_std = std(err,0,2);
 converge_idx = find(err_std <= 2,1);
@@ -495,7 +496,7 @@ ylabel('y (m)');
 
 set(gcf,'units','points','position',[500,500,800,600])
 sdf(gcf,'sj2')
-print -depsc2 eps/18times_repeat_circle_raw.eps
+% print -depsc2 eps/18times_repeat_circle_raw.eps
 return
 
 

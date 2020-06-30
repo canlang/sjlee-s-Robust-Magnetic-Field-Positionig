@@ -4,7 +4,7 @@ lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 data2 = readtable('20171124 MagCoord3axisData.csv');
 
 %%
-A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
+A = imread('map/N1-7F.png','BackgroundColor',[1 1 1]);
 
 xWorldLimits = [-1 1650/20];
 yWorldLimits = [-1 660/20];
@@ -110,6 +110,10 @@ for i = 1:length(tM)
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
     mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
 %     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
+
+    % related work: Horizontal & Vertical components, MaLoc, B_h,B_v
+    mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
+    mag_dist = mag_dist2';
 
     if all(mag_dist) == 0
         break

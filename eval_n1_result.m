@@ -30,16 +30,21 @@ for j = 1:length(intp_candi)
         v_precision = sum(true_pos(i,:))/sum(conv_case(i,:));
         errs = errMat(i,true_pos(i,:));
         err = vertcat(errs{:});
-%         if i==3 && ismember(intp_candi(j),intp_candi)
-        if i==2     % draw N=2000
+        
+        if i==2     % draw N particles, e.g., N=2000 , i==2
 %             h = cdfplot(rmoutliers(err));       
-            h = cdfplot((err));       % draw N=2000
+            h = cdfplot((err));   
             if intp_candi(j) == .8
                 set(h,'LineWidth',4,'Color','r')
-%             else
-%                 cdfplot(rmoutliers(err))
             end
         end
+%         subplot(1,3,i)
+%         hold on
+%         h = cdfplot((err));
+%         if intp_candi(j) == .8
+%             set(h,'LineWidth',4,'Color','r')
+%         end
+        
         fprintf('(N=%d) %.2f / %2.0f (MED/Precision)\n'...
             ,Nc(i), mean(err), v_precision*100);
         re_errMat(i,j) = mean(err);

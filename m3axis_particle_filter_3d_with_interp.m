@@ -4,6 +4,7 @@ data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 % INTERPOLATION
+disp('ILOA: interpolation performance testing...')
 x = data1.x;
 y = data1.y;
 newlM = [];
@@ -30,7 +31,7 @@ data1 = array2table(newlM(:,1:2), 'VariableNames',{'x','y'});
 lM = newlM(:,3:end);
 %%
 
-A = imread('N1-7F.png','BackgroundColor',[1 1 1]);
+A = imread('map/N1-7F.png','BackgroundColor',[1 1 1]);
 
 xWorldLimits = [-1 1650/20];
 yWorldLimits = [-1 660/20];
@@ -135,6 +136,10 @@ for i = 1:length(tM)
     mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
 %     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
 
+    % related work: Horizontal & Vertical components, MaLoc, B_h,B_v
+    mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
+    mag_dist = mag_dist2';
+
     if all(mag_dist) == 0
         break
     end
@@ -180,8 +185,10 @@ for i = 1:length(tM)
         writeVideo(v,frame);
     end
 end
-if video_flag close(v);end
+if video_flag; close(v);end
 %%
+disp('MaLoc result')
+
 figure
 [lineh, bandsh] = fanChart(1:size(err,1),err, 'mean', 10:10:90, ...
     'alpha', .2, 'colormap', {'shadesOfColor', [0 0 .8]});
