@@ -1,5 +1,6 @@
+clearvars;
 
-Nloop = 10;
+Nloop = 1;
 % persistent intp;
 intp = [.2, .3, .5, .8, 1.0, 1.2];
 % intp = [.8];
@@ -16,12 +17,13 @@ for k=1:3       % There is three trajectory (scenarios) for testing
         Nsuccess = 0;
         Dintp = intp(j);
         parfor i=1:Nloop           % available 'parfor' for speed up
-            close all
+            close all;
             if isequal(dist_algo,'ILoA')
                 err = ILoA(site_name,device_name,trj_idx,Dintp,false);
             elseif isequal(dist_algo,'MaLoc')
                 err = ILoA(site_name,device_name,trj_idx,Dintp,false,1);
             else
+                err = 0;
                 disp('not allowed input;')
             end
             %%    
@@ -44,6 +46,6 @@ for k=1:3       % There is three trajectory (scenarios) for testing
         mkdir('est-result',site_name);
     end
     
-    save(sprintf('est-result/%s/traj_%d-%s-errs-rep(%d).mat',site_name,trj_idx,device_name,Nloop),'errs')
+    save(sprintf('est-result/%s/%s_traj_%d-%s-errs-rep(%d).mat',site_name,dist_algo,trj_idx,device_name,Nloop),'errs')
 end
 %%
