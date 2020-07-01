@@ -187,8 +187,9 @@ for i = 1:length(tM)
             mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
             mag_dist = mag_dist2';
         catch
-            disp([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)])
-            break
+            lM_str = mat2str([vecnorm(lM(I,1:2),2,2), lM(I,3)]);
+            tM_str = mat2str([vecnorm(tM(i,1:2),2), tM(i,3)]);
+            fprintf('Wrong case lM: %s  tM: %s', lM_str, tM_str);
         end
     else
         disp('ILoA: wrong input')
