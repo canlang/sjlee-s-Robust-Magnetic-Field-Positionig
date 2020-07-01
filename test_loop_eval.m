@@ -1,21 +1,21 @@
 
-Nloop = 10;
+Nloop = 100;
 % persistent intp;
 % intp = [.2, .3, .5, .8, 1.0, 1.2];
 % intp = [.2, .3, .5, .8, 1.0, 1.2];
 intp = [.8];
 
-for k=1:1       % There is three trajectory (scenarios) for testing
+for k=1:3       % There is three trajectory (scenarios) for testing
     errs = cell(length(intp),Nloop);
     trj_idx = k;
-    device_name = 'iphone';
+    device_name = 'S9';
     site_name = 'KI-1F';        % candidates: N1-7F (iphone), KI-1F (iphone, MATE20pro, S9)
 
     for j=1:length(intp)
         Nfailure = 0;
         Nsuccess = 0;
         Dintp = intp(j);
-        for i=1:Nloop           % available 'parfor' for speed up
+        parfor i=1:Nloop           % available 'parfor' for speed up
             close all
             err = ILoA(site_name,device_name,trj_idx,Dintp,false);
             %%    
@@ -35,6 +35,6 @@ for k=1:1       % There is three trajectory (scenarios) for testing
         , intp(j), Nsuccess/Nloop*100, MED);
         % return
     end
-    save(sprintf('est-result/%s-s%d-%s-errs(%d).mat',site_name,trj_idx,device_name,Nloop),'errs')
+    save(sprintf('est-result/%s-s%d-%s-errs-rep(%d)-intp(%.1f).mat',site_name,trj_idx,device_name,Nloop,intp),'errs')
 end
 %%
