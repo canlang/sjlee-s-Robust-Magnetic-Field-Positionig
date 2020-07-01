@@ -31,7 +31,7 @@ set(gcf,'units','points','position',[700,500,1000,350])
 legend('reference point')
 % legend('reference point','location','best')   
 sdf(gcf,'sj4')
-print -depsc2 eps/env_setting.eps
+% print -depsc2 eps/env_setting.eps
 
 % axis equal
 % xlim([8 83])
@@ -110,7 +110,7 @@ for i = 1:length(tM)
     % ================ UPDATE
     
     % 1. find (geo-locational) nearest learning data
-    [phy_dist,I] = findNearestLocation_mex([data1.x,data1.y],[ps.x,ps.y]);
+    [phy_dist,I] = findNearestLocation([data1.x,data1.y],[ps.x,ps.y]);
        
     % 2. calculate magnetic distance
     % Converted 'getHeadingRotatedVector' function

@@ -179,9 +179,13 @@ for i = 1:length(tM)
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
 
     % related work: Horizontal & Vertical components, MaLoc, B_h,B_v
-    mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
-    mag_dist = mag_dist2';
-
+    try
+        mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
+        mag_dist = mag_dist2';
+    catch
+        disp([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)])
+        break
+    end
 
     if ~all(mag_dist)
         break

@@ -1,5 +1,5 @@
 
-Nloop = 100;
+Nloop = 2;
 % persistent intp;
 % intp = [.2, .3, .5, .8, 1.0, 1.2];
 % intp = [.2, .3, .5, .8, 1.0, 1.2];
@@ -35,6 +35,6 @@ for k=1:3       % There is three trajectory (scenarios) for testing
         , intp(j), Nsuccess/Nloop*100, MED);
         % return
     end
-    save(sprintf('est-result/%s-s%d-%s-errs-rep(%d)-intp(%.1f).mat',site_name,trj_idx,device_name,Nloop,intp),'errs')
+    save(sprintf('est-result/%s-s%d-%s-errs-intp(%.1f)-rep(%d).mat',site_name,trj_idx,device_name,intp,Nloop),'errs')
 end
 %%
