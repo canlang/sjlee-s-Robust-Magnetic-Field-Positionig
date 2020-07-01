@@ -3,6 +3,7 @@ Nloop = 10;
 % persistent intp;
 intp = [.2, .3, .5, .8, 1.0, 1.2];
 % intp = [.8];
+dist_algo = 'ILoA';
 
 for k=1:3       % There is three trajectory (scenarios) for testing
     errs = cell(length(intp),Nloop);
@@ -16,7 +17,13 @@ for k=1:3       % There is three trajectory (scenarios) for testing
         Dintp = intp(j);
         parfor i=1:Nloop           % available 'parfor' for speed up
             close all
-            err = ILoA(site_name,device_name,trj_idx,Dintp,false);
+            if isequal(dist_algo,'ILoA')
+                err = ILoA(site_name,device_name,trj_idx,Dintp,false);
+            elseif isequal(dist_algo,'MaLoc')
+                err = ILoA(site_name,device_name,trj_idx,Dintp,false,1);
+            else
+                disp('not allowed input;')
+            end
             %%    
             if sum(err<5)>length(err)/2
                 % disp converged!
