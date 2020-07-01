@@ -1,7 +1,11 @@
-function err = ILoA(site_name,device_name,tr_idx,intp_intv,vis_flag)
+function err = ILoA(site_name,device_name,tr_idx,intp_intv,vis_flag,dist_idx, varargin)
 % purpose: convert the localization function - for evaluation loop
 
 %%
+if nargin < 6
+    dist_idx = 0;
+end
+
 map = loadMagneticMap('mats',site_name,intp_intv);
 lm.x = map(:,1);lm.y = map(:,2);
 lM = map(:,3:5);
@@ -161,30 +165,34 @@ for i = 1:length(tM)
 %         'UniformOutput',false); 
 %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
 %     (3) UPDATE FUNCTION candidate  
-%     R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])...
-%         ,-ps.mag_heading,'UniformOutput',false); 
-%     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+    if dist_idx == 0
+        R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])...
+            ,-ps.mag_heading,'UniformOutput',false); 
+        rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
 
-%     R = arrayfun(@(x) euler2rotMat(-euler(1,1),-euler(1,2),x),...
-%         -euler(1,3)-ps.mag_heading,'UniformOutput',false);
-%     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
-    
-    % EUCLIDEAN
-    % TODO: may be more optimizable (DONE?maybe)
-%     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
-%     mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
-%     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
-    
-    % COSINE
-%     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
+    %     R = arrayfun(@(x) euler2rotMat(-euler(1,1),-euler(1,2),x),...
+    %         -euler(1,3)-ps.mag_heading,'UniformOutput',false);
+    %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
 
-    % related work: Horizontal & Vertical components, MaLoc, B_h,B_v
-    try
-        mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
-        mag_dist = mag_dist2';
-    catch
-        disp([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)])
-        break
+        % EUCLIDEAN
+        % TODO: may be more optimizable (DONE?maybe)
+    %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
+        mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
+    %     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
+
+        % COSINE
+    %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
+    elseif dist_idx == 1   % related work: Horizontal & Vertical components, MaLoc, B_h,B_v    
+        try
+            mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
+            mag_dist = mag_dist2';
+        catch
+            disp([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)])
+            break
+        end
+    else
+        disp('ILoA: wrong input')
+        return
     end
 
     if ~all(mag_dist)

@@ -1,9 +1,8 @@
 
-Nloop = 2;
+Nloop = 10;
 % persistent intp;
-% intp = [.2, .3, .5, .8, 1.0, 1.2];
-% intp = [.2, .3, .5, .8, 1.0, 1.2];
-intp = [.8];
+intp = [.2, .3, .5, .8, 1.0, 1.2];
+% intp = [.8];
 
 for k=1:3       % There is three trajectory (scenarios) for testing
     errs = cell(length(intp),Nloop);
@@ -33,8 +32,11 @@ for k=1:3       % There is three trajectory (scenarios) for testing
         MED = mean(rmoutliers(all_errs));
         fprintf('GeoMapInt: %.1f, Convergence rate: %.1f, MED: %.2f\n'...
         , intp(j), Nsuccess/Nloop*100, MED);
-        % return
     end
-    save(sprintf('est-result/%s-s%d-%s-errs-intp(%.1f)-rep(%d).mat',site_name,trj_idx,device_name,intp,Nloop),'errs')
+    if ~exist(fullfile('est-result',site_name), 'dir')  
+        mkdir('est-result',site_name);
+    end
+    
+    save(sprintf('est-result/%s/traj_%d-%s-errs-rep(%d).mat',site_name,trj_idx,device_name,Nloop),'errs')
 end
 %%
