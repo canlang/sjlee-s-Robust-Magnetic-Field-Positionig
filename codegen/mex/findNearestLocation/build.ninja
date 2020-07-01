@@ -1,0 +1,54 @@
+# CompilerName=clang
+# Mode=optim
+ninja_required_version = 1.3
+
+# Basic folders
+root = .
+builddir = $root/build/maci64
+matlabdir = /Applications/MATLAB_R2020a.app
+startdir = /Users/sjlee/git/magnetic_field_pf_exp
+
+# Toolchain information
+cc = /usr/bin/xcrun -sdk macosx10.15 clang
+cxx = /usr/bin/xcrun -sdk macosx10.15 clang++
+linker = /usr/bin/xcrun -sdk macosx10.15 clang
+linkerxx = /usr/bin/xcrun -sdk macosx10.15 clang++
+
+cflags =  -fno-common -arch x86_64 -mmacosx-version-min=10.9 -fexceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I "$root" -I "$startdir" -I "$root/interface" -I "$matlabdir/extern/include" -I "." -DMODEL=findNearestLocation_mex -c -fPIC -Xpreprocessor -fopenmp -I "$matlabdir/toolbox/eml/externalDependency/omp/maci64/include" -DOpenMP_omp_LIBRARY="$matlabdir/sys/os/maci64/libiomp5.dylib" 
+
+cxxflags =  -fno-common -arch x86_64 -mmacosx-version-min=10.9 -fexceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -fobjc-arc -std=c++11 -stdlib=libc++ -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c++11 -I "$root" -I "$startdir" -I "$root/interface" -I "$matlabdir/extern/include" -I "." -DMODEL=findNearestLocation_mex -c -fPIC -Xpreprocessor -fopenmp -I "$matlabdir/toolbox/eml/externalDependency/omp/maci64/include" -DOpenMP_omp_LIBRARY="$matlabdir/sys/os/maci64/libiomp5.dylib" 
+
+ldflags =  -Wl,-twolevel_namespace -undefined error -arch x86_64 -mmacosx-version-min=10.9 -Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -bundle   -L"$matlabdir/bin/maci64" -lmx -lmex -lmat -lc++  -Wl,-rpath,@loader_path -o findNearestLocation_mex.mexmaci64 -lemlrt -lcovrt -lut -lmwmathutil -fPIC -L"$matlabdir/sys/os/maci64" -liomp5 -Wl,-exported_symbols_list,findNearestLocation_mex.map
+
+# Build Rules
+rule cc
+    command = $cc $cflags $in -o $out
+
+rule cxx
+    command = $cxx $cxxflags $in -o $out
+
+rule link
+    command = $linker $in $ldflags
+
+rule linkxx
+    command = $linkerxx $in $ldflags
+
+# Build
+build $builddir/rt_nonfinite.o : cc $root/rt_nonfinite.c
+build $builddir/findNearestLocation_mexutil.o : cc $root/findNearestLocation_mexutil.c
+build $builddir/findNearestLocation_data.o : cc $root/findNearestLocation_data.c
+build $builddir/findNearestLocation_initialize.o : cc $root/findNearestLocation_initialize.c
+build $builddir/findNearestLocation_terminate.o : cc $root/findNearestLocation_terminate.c
+build $builddir/findNearestLocation.o : cc $root/findNearestLocation.c
+build $builddir/pdist2.o : cc $root/pdist2.c
+build $builddir/eml_int_forloop_overflow_check.o : cc $root/eml_int_forloop_overflow_check.c
+build $builddir/scanfornan.o : cc $root/scanfornan.c
+build $builddir/sort.o : cc $root/sort.c
+build $builddir/sortIdx.o : cc $root/sortIdx.c
+build $builddir/_coder_findNearestLocation_api.o : cc $root/interface/_coder_findNearestLocation_api.c
+build $builddir/_coder_findNearestLocation_mex.o : cc $root/interface/_coder_findNearestLocation_mex.c
+build $builddir/_coder_findNearestLocation_info.o : cc $root/interface/_coder_findNearestLocation_info.c
+build $builddir/c_mexapi_version.o : cc $matlabdir/extern/version/c_mexapi_version.c
+
+# Link
+build $root/findNearestLocation_mex.mexmaci64 : link $builddir/rt_nonfinite.o $builddir/findNearestLocation_mexutil.o $builddir/findNearestLocation_data.o $builddir/findNearestLocation_initialize.o $builddir/findNearestLocation_terminate.o $builddir/findNearestLocation.o $builddir/pdist2.o $builddir/eml_int_forloop_overflow_check.o $builddir/scanfornan.o $builddir/sort.o $builddir/sortIdx.o $builddir/_coder_findNearestLocation_api.o $builddir/_coder_findNearestLocation_mex.o $builddir/_coder_findNearestLocation_info.o $builddir/c_mexapi_version.o 

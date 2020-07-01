@@ -9,7 +9,7 @@ lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 % nParticleCandidate = 2000:100:3000;
 % nRepeat = 500;
 nParticleCandidate = 1000:1000:3000;
-nRepeat = 100;
+nRepeat = 10;
 
 % errMat = zeros(length(nParticleCandidate),nRepeat);
 % stdMat = zeros(length(nParticleCandidate),nRepeat);

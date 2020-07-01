@@ -1,8 +1,11 @@
 function traj_errors = eval_3axis_pf(t_input_idx,a,b)
 % clear; close all;
-% purpose: evaluate score the trajectory
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% purpose: evaluate score the trajectory, used in jupyterlab?
 % from: revised from
 % m3axis_particle_filter_3d_std_validation_newinput_form_v2.m file
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % t_input_idx = 3;
 % t_input_idx = 29;

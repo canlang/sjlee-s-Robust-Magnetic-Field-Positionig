@@ -174,6 +174,7 @@ if video_flag close(v);end
 % set(gcf,'units','points','position',[200,500,2000,800])
 % sdf(gcf,'sj2')
 % return
+disp ('current: MaLoc result')
 %%
 close all
 % figure

@@ -2,14 +2,20 @@ function err = ILoA(site_name,device_name,tr_idx,intp_intv,vis_flag)
 % purpose: convert the localization function - for evaluation loop
 
 %%
-map = magmap_construction('mats',site_name,intp_intv);
+map = loadMagneticMap('mats',site_name,intp_intv);
 lm.x = map(:,1);lm.y = map(:,2);
 lM = map(:,3:5);
 
 testfolder_name = sprintf('test-%s-%s',site_name,device_name);
 test_path = sprintf('rawdata/%s',testfolder_name);
-target_rawdata_paths = getNameFolds(test_path);
-rawdata = load_rawdata(fullfile(test_path,target_rawdata_paths{tr_idx}));
+if isequal(device_name, 'iphone')
+    test_rawdata_paths = getNameFiles(test_path);
+    rawdata = load_rawdata(fullfile(test_path,test_rawdata_paths{tr_idx}),'iPhone');    % iOS
+else        
+    test_rawdata_paths = getNameFolds(test_path);
+    rawdata = load_rawdata(fullfile(test_path,test_rawdata_paths{tr_idx}));             % Android
+end
+
 
 %% resample for synchronize
 rate = 2e-2;
@@ -41,7 +47,8 @@ rotMat = quatern2rotMat(quaternion(locs,:));
 % rotMat = quatern2rotMat(quaternConj(quaternion(locs,:)));
 
 std_euler = stdfilt(unwrap(euler(:,3)));
-[~,turn_locs] = findpeaks(std_euler,'MinPeakHeight',.3);
+% [~,turn_locs] = findpeaks(std_euler,'MinPeakHeight',.3);              %
+% for noise optimization, during turning area
 %% inbound & outbound
 % site_name = 'KI-1F';
 layout = jsondecode(fileread(sprintf('map/%s.json',site_name)));
@@ -139,7 +146,7 @@ for i = 1:length(tM)
     
     % ================ UPDATE    
     % 1. find (geo-locational) nearest learning data
-    [phy_dist,I] = pdist2([lm.x,lm.y],[ps.x,ps.y],'euclidean','Smallest',1);
+    [phy_dist,I] = findNearestLocation([lm.x,lm.y],[ps.x,ps.y]);
     % 2. calculate Rotated magnetic field data and magnetic distance    
 %     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),0,...
 %         'UniformOutput',false);
@@ -154,9 +161,9 @@ for i = 1:length(tM)
 %         'UniformOutput',false); 
 %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
 %     (3) UPDATE FUNCTION candidate  
-    R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])...
-        ,-ps.mag_heading,'UniformOutput',false); 
-    rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+%     R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])...
+%         ,-ps.mag_heading,'UniformOutput',false); 
+%     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
 
 %     R = arrayfun(@(x) euler2rotMat(-euler(1,1),-euler(1,2),x),...
 %         -euler(1,3)-ps.mag_heading,'UniformOutput',false);
@@ -165,7 +172,7 @@ for i = 1:length(tM)
     % EUCLIDEAN
     % TODO: may be more optimizable (DONE?maybe)
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
-    mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
+%     mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
 %     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
     
     % COSINE

@@ -1,4 +1,5 @@
-function map = magmap_construction(mypath,site_name,d)
+function map = loadMagneticMap(mypath,site_name,d)
+% Revised from 'magmap_construction, 2020.7.1
 % d: interval
 % addpath(genpath(path));
 filename = sprintf('magmap-%s-%.1fa.mat',site_name,d);
@@ -27,7 +28,7 @@ else
     fprintf('Creating radio map (alpha value=%.1f)\n',shp.Alpha);
     
     if strcmp(site_name,'KI-1F')
-        shp.Alpha = .6;         % Warning: Duplicate data points have been detected and removed.??
+        shp.Alpha = .6;             % Warning: Duplicate data points have been detected and removed.??
     end
     in = inShape(shp,X,Y);
     xg = X(in);

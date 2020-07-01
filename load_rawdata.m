@@ -22,7 +22,9 @@ if nargin == 1
 end
 
 if (nargin == 2 && strcmp(varargin{1},'iPhone'))
-    filename = fullfile(datapath.folder,datapath.name);
+%     filename = fullfile(datapath.folder,datapath.name);
+    filename = datapath;
+    
 %     M = readmatrix(filename,'Delimiter',{','});
 %     M = unique(M,'rows');
 %     acc = M(:,40:42)+M(:,48:50);     %TODO : second '2' column is not meaning, so have to re-designed

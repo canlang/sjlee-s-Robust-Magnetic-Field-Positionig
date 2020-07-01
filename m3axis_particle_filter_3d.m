@@ -4,8 +4,8 @@ data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 % Video save
-video_flag = chooseVideoSaveOrNot;
-% video_flag = false;
+% video_flag = chooseVideoSaveOrNot;
+video_flag = false;
 
 
 A = imread('map/N1-7F.png','BackgroundColor',[1 1 1]);
@@ -110,10 +110,17 @@ for i = 1:length(tM)
     % ================ UPDATE
     
     % 1. find (geo-locational) nearest learning data
-    [phy_dist,I] = pdist2([data1.x,data1.y],[ps.x,ps.y],'euclidean','Smallest',1);
+    [phy_dist,I] = findNearestLocation_mex([data1.x,data1.y],[ps.x,ps.y]);
+       
     % 2. calculate magnetic distance
-    R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps.mag_heading,'UniformOutput',false);
-    rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
+    % Converted 'getHeadingRotatedVector' function
+%     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps.mag_heading,'UniformOutput',false);
+%     rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
+    rotatedMag = getHeadingRotatedVector(ps.mag_heading, tM(i,:));
+%     if ~isequal(rotatedMag,rotatedMag2)
+%         disp('error convert')
+%     end
+
     % TODO: may be more optimizable (DONE?maybe)
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
     mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
@@ -159,7 +166,7 @@ for i = 1:length(tM)
     set(h_ps,'XData',ps.x,'YData',ps.y)                             % ps result
     set(h_pm,'XData',mean(ps.x),'YData',mean(ps.y));
     set(h_gt,'XData',data2.coord_x(i),'YData',data2.coord_y(i))     % ground truth
-    drawnow
+    drawnow limitrate
     
 %     est(i,:) = [mean(ps.x),mean(ps.y),mean(angdiff(ps.mag_heading,0))];
     est(i,:) = [mean(ps.x),mean(ps.y),mean(abs(angdiff(ps.mag_heading,0)))];        %x,y,heading
@@ -173,7 +180,8 @@ for i = 1:length(tM)
     end
     ps_hist(i) = ps;
 end
-if video_flag; close(v);end
+if video_flag; close(v); end
+disp ('current: MaLoc result')
 %%
 figure
 [lineh, bandsh] = fanChart(1:size(err,1),err, 'mean', 10:10:90, ...

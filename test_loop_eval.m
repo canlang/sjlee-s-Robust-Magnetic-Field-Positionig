@@ -1,23 +1,23 @@
 
-Nloop = 1;
+Nloop = 10;
 % persistent intp;
-intp = [.2, .3, .5, .8, 1.0, 1.2];
 % intp = [.2, .3, .5, .8, 1.0, 1.2];
-% intp = [.8];
+% intp = [.2, .3, .5, .8, 1.0, 1.2];
+intp = [.8];
 
-for k=1:3    
+for k=1:1       % There is three trajectory (scenarios) for testing
     errs = cell(length(intp),Nloop);
     trj_idx = k;
-    device_name = 'S9';
-    site_name = 'KI-1F';
+    device_name = 'iphone';
+    site_name = 'KI-1F';        % candidates: N1-7F (iphone), KI-1F (iphone, MATE20pro, S9)
 
     for j=1:length(intp)
         Nfailure = 0;
         Nsuccess = 0;
         Dintp = intp(j);
-        parfor i=1:Nloop
+        for i=1:Nloop           % available 'parfor' for speed up
             close all
-            err = ILoA('KI-1F','S9',trj_idx,Dintp,false);
+            err = ILoA(site_name,device_name,trj_idx,Dintp,false);
             %%    
             if sum(err<5)>length(err)/2
                 % disp converged!

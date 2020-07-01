@@ -56,8 +56,10 @@ lM = map(:,3:5);
 
 % plot(lm.x,lm.y,'.')
 %%
-test_data_paths = dir(sprintf('rawdata/test-%s-iphone/*.csv',site_name));
-rawdata = load_rawdata(test_data_paths(tr_idx),'iPhone');
+% test_data_paths = dir(sprintf('rawdata/test-%s-iphone/*.csv',site_name));
+test_iphone_path = sprintf('rawdata/test-%s-iphone/',site_name);
+test_data_paths = getNameFiles(test_iphone_path);
+rawdata = load_rawdata(fullfile(test_iphone_path,test_data_paths{tr_idx}),'iPhone');
 
 %% resample for synchronize
 % rate = 1/60;
