@@ -7,7 +7,7 @@ data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 feature_algo = {'ILoA', 'MaLoc'};
-algo_idx = 2;
+algo_idx = 1;
 fprintf('%s testing...\n',feature_algo{algo_idx})
 
 % INTERPOLATION
@@ -51,7 +51,7 @@ convIndexes = zeros(length(nParticleCandidate),nRepeat);
 errMat = cell(length(nParticleCandidate),nRepeat);
 %%
 for k = 1:length(nParticleCandidate)
-    for j = 1:nRepeat
+    parfor j = 1:nRepeat
         % ------------------------
         % initialize particle
         n = nParticleCandidate(k);
