@@ -150,7 +150,7 @@ for i = 1:length(tM)
     
     % ================ UPDATE    
     % 1. find (geo-locational) nearest learning data
-    [phy_dist,I] = findNearestLocation([lm.x,lm.y],[ps.x,ps.y]);
+    [phy_dist,I] = findNUnable to perform assignment because the size of the left side is 1-by-1 and the size of the right side is 0-by-1.earestLocation([lm.x,lm.y],[ps.x,ps.y]);
     % 2. calculate Rotated magnetic field data and magnetic distance    
 %     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),0,...
 %         'UniformOutput',false);

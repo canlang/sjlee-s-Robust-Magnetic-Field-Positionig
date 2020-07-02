@@ -43,7 +43,7 @@ lM = newlM(:,3:end);
 % nRepeat = 500;
 nParticleCandidate = 1000:1000:3000;
 % % nParticleCandidate = [1000 2000];
-nRepeat = 2;
+nRepeat = 100;
 
 % errMat = zeros(length(nParticleCandidate),nRepeat);
 % stdMat = zeros(length(nParticleCandidate),nRepeat);
@@ -51,7 +51,7 @@ convIndexes = zeros(length(nParticleCandidate),nRepeat);
 errMat = cell(length(nParticleCandidate),nRepeat);
 %%
 for k = 1:length(nParticleCandidate)
-    parfor j = 1:nRepeat
+    for j = 1:nRepeat
         % ------------------------
         % initialize particle
         n = nParticleCandidate(k);
@@ -116,10 +116,12 @@ for k = 1:length(nParticleCandidate)
                 mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
             %     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
             elseif algo_idx == 2
-                mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
+                observed = [vecnorm(lM(I,1:2),2,2), lM(I,3)];
+                measured = [vecnorm(tM(i,1:2),2), tM(i,3)];
+                mag_dist2 = pdist2(observed, measured,'mahalanobis',nearestSPD(nancov(observed)));
                 mag_dist = mag_dist2';
-            else
-                mag_dist = 0
+            else        % Unexpedted (wrong) case
+                mag_dist = 0;
                 disp('wrong feature algoithm input');
             end
 
@@ -155,6 +157,9 @@ for k = 1:length(nParticleCandidate)
         est_err = sqrt(sum((est(:,1:2)-[data2.coord_x (data2.coord_y+.2)]).^2,2));
         
         cIdx = find(err_std < 2,1);
+        if isempty(cIdx)        % not converged case
+            cIdx = length(tM);
+        end
         convIndexes(k,j) = cIdx;
         if cIdx<(length(data2.coord_x)/2)
             errMat{k,j} = est_err(cIdx:end);
