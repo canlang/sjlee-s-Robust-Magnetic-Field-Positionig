@@ -7,7 +7,7 @@ data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 feature_algo = {'ILoA', 'MaLoc'};
-algo_idx = 1;
+algo_idx = 2;
 fprintf('%s testing...\n',feature_algo{algo_idx})
 
 % INTERPOLATION
@@ -51,7 +51,7 @@ convIndexes = zeros(length(nParticleCandidate),nRepeat);
 errMat = cell(length(nParticleCandidate),nRepeat);
 %%
 for k = 1:length(nParticleCandidate)
-    for j = 1:nRepeat
+    parfor j = 1:nRepeat
         % ------------------------
         % initialize particle
         n = nParticleCandidate(k);
@@ -117,7 +117,10 @@ for k = 1:length(nParticleCandidate)
             %     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
             elseif algo_idx == 2
                 mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
-                mag_dist = mag_dist2';    
+                mag_dist = mag_dist2';
+            else
+                mag_dist = 0
+                disp('wrong feature algoithm input');
             end
 
             if ~all(mag_dist)
@@ -202,7 +205,7 @@ save_dir = fullfile('exp_mats','N1-7F-CDF');
 if ~exist(save_dir,'dir')
     mkdir(save_dir)
 end
-mat_filename = sprintf('%s/n1-7f-parfor-%s.mat',save_dir,num2str(interp_interval));
+mat_filename = sprintf('%s/%s-n1-7f-parfor-%s.mat',save_dir,feature_algo{algo_idx},num2str(interp_interval));
 if ~exist(mat_filename,'file')
     save(mat_filename,'convIndexes','errMat','nParticleCandidate')
 else
