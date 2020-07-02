@@ -150,7 +150,7 @@ for i = 1:length(tM)
     
     % ================ UPDATE    
     % 1. find (geo-locational) nearest learning data
-    [phy_dist,I] = findNUnable to perform assignment because the size of the left side is 1-by-1 and the size of the right side is 0-by-1.earestLocation([lm.x,lm.y],[ps.x,ps.y]);
+    [phy_dist,I] = findNearestLocation([lm.x,lm.y],[ps.x,ps.y]);
     % 2. calculate Rotated magnetic field data and magnetic distance    
 %     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),0,...
 %         'UniformOutput',false);
@@ -166,9 +166,11 @@ for i = 1:length(tM)
 %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
 %     (3) UPDATE FUNCTION candidate  
     if dist_idx == 1
-        R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])...
-            ,-ps.mag_heading,'UniformOutput',false); 
-        rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+        % TODO: have to check other rotated version. 
+%         R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])...
+%             ,-ps.mag_heading,'UniformOutput',false); 
+%         rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+        rotatedMag = getHeadingRotatedVector(ps.mag_heading, tM(i,:));
 
     %     R = arrayfun(@(x) euler2rotMat(-euler(1,1),-euler(1,2),x),...
     %         -euler(1,3)-ps.mag_heading,'UniformOutput',false);
@@ -183,18 +185,13 @@ for i = 1:length(tM)
         % COSINE
     %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
     elseif dist_idx == 2   % related work: Horizontal & Vertical components, MaLoc, B_h,B_v    
-        try
-            mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
-            mag_dist = mag_dist2';
-        catch
-%             lM_str = mat2str([vecnorm(lM(I,1:2),2,2), lM(I,3)]);
-%             tM_str = mat2str([vecnorm(tM(i,1:2),2), tM(i,3)]);
-%             fprintf('Wrong case lM: %s  tM: %s', lM_str, tM_str);
-            save('temporal_testcase_ILoA.mat','lM','tM','i')
-        end
+        observed = [vecnorm(lM(I,1:2),2,2), lM(I,3)];
+        measured = [vecnorm(tM(i,1:2),2), tM(i,3)];
+        mag_dist2 = pdist2(observed, measured,'mahalanobis',nearestSPD(nancov(observed)));
+        mag_dist = mag_dist2';
     else
-        disp('ILoA: wrong input')
-        return
+        disp('ILoA.m - wrong method input arg')
+        mag_dist = 0;
     end
 
     if ~all(mag_dist)

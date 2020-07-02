@@ -6,9 +6,9 @@ data1 = readtable('batch.csv');
 data2 = readtable('20171124 MagCoord3axisData.csv');
 lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
-feature_algo = {'ILoA', 'MaLoc'};
-algo_idx = 1;
-fprintf('%s testing...\n',feature_algo{algo_idx})
+method_name = {'ILoA', 'MaLoc'};
+algo_idx = 2;
+fprintf('%s testing...\n',method_name{algo_idx})
 
 % INTERPOLATION
 interp_interval = .8;
@@ -43,7 +43,7 @@ lM = newlM(:,3:end);
 % nRepeat = 500;
 nParticleCandidate = 1000:1000:3000;
 % % nParticleCandidate = [1000 2000];
-nRepeat = 100;
+nRepeat = 20;
 
 % errMat = zeros(length(nParticleCandidate),nRepeat);
 % stdMat = zeros(length(nParticleCandidate),nRepeat);
@@ -202,7 +202,7 @@ set(0,'DefaultAxesColorOrder',brewermap(3,'Set1'))
 
 set(gcf,'units','points','position',[200,500,1100,500])
 % sdf(gcf,'sj3')
-tightfig(gcf);
+% tightfig(gcf);
 
 
 %%
@@ -210,13 +210,43 @@ save_dir = fullfile('exp_mats','N1-7F-CDF');
 if ~exist(save_dir,'dir')
     mkdir(save_dir)
 end
-mat_filename = sprintf('%s/%s-n1-7f-parfor-%s.mat',save_dir,feature_algo{algo_idx},num2str(interp_interval));
+mat_filename = sprintf('%s/%s-n1-7f-parfor-%s.mat',save_dir,method_name{algo_idx},num2str(interp_interval));
 if ~exist(mat_filename,'file')
     save(mat_filename,'convIndexes','errMat','nParticleCandidate')
 else
     fprintf('%s file exist, so this is not saved.\n', mat_filename);
 end
 return
+%% box ploting ILoA & MaLoc: departed to 'boxplotting_ILoA_MaLoc.m'
+% clear g
+% 
+% for i=1:1
+%     disp(method_name{i})
+%     mat_filename = sprintf('%s/%s-n1-7f-parfor-%s.mat',save_dir,method_name{i},num2str(interp_interval));
+%     file_struct = load(mat_filename);
+%     fn = fieldnames(file_struct);   
+%     % fn{3}: case of the number of particles, fn{2}: error matrix, fn{1}: index of
+%     % considring converged    
+%     err_mat = file_struct.(fn{2});
+%     n_ptcls = file_struct.(fn{3});
+%     
+%     label_n_particles = {};
+%     err = {};
+%     label_method = {};
+%     for j=1:length(file_struct.(fn{3}))
+%         err{j} = cell2mat(err_mat(j,:)')
+%         label_n_particles{j} = ones(size(err{j}))*n_ptcls(j)
+%         label_method{j} = ones(size(err{j}))*i
+% %         label_method{j} = repmat(method_name{i},size(err{j}));
+%     end
+% 
+% end
+% % label_n_particles = cell2mat(label_n_particles');
+% g(1,1)=gramm('x',label_n_particles,'y',err);
+% g(1,1).stat_boxplot();
+% g(1,1).set_title('stat_boxplot()');
+% figure('Position',[100 100 800 800]);
+% g.draw();
 %%
 % plot(nParticleCandidate,mean(errMat,2),'x-')
 
