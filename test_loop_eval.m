@@ -21,7 +21,7 @@ for k=1:3       % There is three trajectory (scenarios) for testing
             if isequal(dist_algo,'ILoA')
                 err = ILoA(site_name,device_name,trj_idx,Dintp,false);
             elseif isequal(dist_algo,'MaLoc')
-                err = ILoA(site_name,device_name,trj_idx,Dintp,false,1);
+                err = ILoA(site_name,device_name,trj_idx,Dintp,false,2);
             else
                 err = 0;
                 disp('not allowed input;')

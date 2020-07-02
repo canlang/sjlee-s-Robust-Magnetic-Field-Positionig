@@ -3,7 +3,7 @@ function err = ILoA(site_name,device_name,tr_idx,intp_intv,vis_flag,dist_idx, va
 
 %%
 if nargin < 6
-    dist_idx = 0;
+    dist_idx = 1;
 end
 
 map = loadMagneticMap('mats',site_name,intp_intv);
@@ -165,7 +165,7 @@ for i = 1:length(tM)
 %         'UniformOutput',false); 
 %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
 %     (3) UPDATE FUNCTION candidate  
-    if dist_idx == 0
+    if dist_idx == 1
         R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])...
             ,-ps.mag_heading,'UniformOutput',false); 
         rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
@@ -182,14 +182,15 @@ for i = 1:length(tM)
 
         % COSINE
     %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
-    elseif dist_idx == 1   % related work: Horizontal & Vertical components, MaLoc, B_h,B_v    
+    elseif dist_idx == 2   % related work: Horizontal & Vertical components, MaLoc, B_h,B_v    
         try
             mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
             mag_dist = mag_dist2';
         catch
-            lM_str = mat2str([vecnorm(lM(I,1:2),2,2), lM(I,3)]);
-            tM_str = mat2str([vecnorm(tM(i,1:2),2), tM(i,3)]);
-            fprintf('Wrong case lM: %s  tM: %s', lM_str, tM_str);
+%             lM_str = mat2str([vecnorm(lM(I,1:2),2,2), lM(I,3)]);
+%             tM_str = mat2str([vecnorm(tM(i,1:2),2), tM(i,3)]);
+%             fprintf('Wrong case lM: %s  tM: %s', lM_str, tM_str);
+            save('temporal_testcase_ILoA.mat','lM','tM','i')
         end
     else
         disp('ILoA: wrong input')
