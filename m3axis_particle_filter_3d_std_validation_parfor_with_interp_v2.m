@@ -1,5 +1,6 @@
 % Revised from 'm3axis_particle_filter_3d_std_validation_parfor_with_interp
 % previous script was used in TMC manuscript
+% only N1? test?
 
 clearvars; close all;
 data1 = readtable('batch.csv');
@@ -43,7 +44,7 @@ lM = newlM(:,3:end);
 % nRepeat = 500;
 nParticleCandidate = 1000:1000:3000;
 % % nParticleCandidate = [1000 2000];
-nRepeat = 20;
+nRepeat = 10;
 
 % errMat = zeros(length(nParticleCandidate),nRepeat);
 % stdMat = zeros(length(nParticleCandidate),nRepeat);

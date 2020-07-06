@@ -1,6 +1,8 @@
 % for MaLoc result combine to compare accuracy
 clearvars;close all;
 % plotting
+method_name = {'ILoA', 'MaLoc'};
+algo_idx = 2;
 intp_candi = [.1,.2,.3,.5,.8,1,1.2];
 Nc = [1000,2000,3000];
 
@@ -16,7 +18,8 @@ re_errMat = zeros(length(Nc),length(intp_candi));
 re_preMat = re_errMat;
 
 for j = 1:length(intp_candi)
-    filename = sprintf('est-result/n1-7f-parfor-%s.mat',num2str(intp_candi(j)));
+    % the mat file was from the '~~std_validation_parfor_with_interp.m'
+    filename = sprintf('exp_mats/N1-7F-CDF/set1/%s-n1-7f-parfor-%s.mat',method_name{algo_idx},num2str(intp_candi(j)));
     load(filename)
     gt_length = 63;
     true_pos_thr = 3;
@@ -32,7 +35,7 @@ for j = 1:length(intp_candi)
         errs = errMat(i,true_pos(i,:));
         err = vertcat(errs{:});
         
-        if i==2     % draw N particles, e.g., N=2000 , i==2
+        if i==3     % draw N particles, e.g., N=2000 , i==2
 %             h = cdfplot(rmoutliers(err));       
             h = cdfplot((err));   
             if intp_candi(j) == .8
