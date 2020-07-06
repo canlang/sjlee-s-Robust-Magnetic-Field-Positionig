@@ -170,7 +170,7 @@ for i = 1:length(tM)
 %         R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])...
 %             ,-ps.mag_heading,'UniformOutput',false); 
 %         rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
-        rotatedMag = getHeadingRotatedVector(ps.mag_heading, tM(i,:));
+        rotatedMag = getHeadingRotatedVector(ps.mag_heading, tM(i,:), rotMat(:,:,i));
 
     %     R = arrayfun(@(x) euler2rotMat(-euler(1,1),-euler(1,2),x),...
     %         -euler(1,3)-ps.mag_heading,'UniformOutput',false);

@@ -4,7 +4,8 @@ Nloop = 2;
 % persistent intp;
 % intp = [.2, .3, .5, .8, 1.0, 1.2];
 intp = [.8];
-dist_algo = 'ILoA';
+dist_algo = 'MaLoc';
+fprintf('%s method testing at KI building...\n',dist_algo);
 
 for k=1:3       % There is three trajectory (scenarios) for testing
     errs = cell(length(intp),Nloop);

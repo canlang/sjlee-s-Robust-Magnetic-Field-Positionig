@@ -1,12 +1,16 @@
 clearvars; close all
 
-intp_candi = [.1];
-% intp_candi = [.2,.3,.5,.8,1,1.2];
+% intp_candi = [.1];
+intp_candi = [.2,.3,.5,.8,1,1.2];
 % intp_candi = [.1,.2,.3,.5,.8,1,1.2];
 
 device_name = 'S9';
 site_name = 'KI-1F';
-fileFormat = 'est-result/%s-s%d-%s-errs(100)-n4000.mat';
+% fileFormat = 'est-result/%s-s%d-%s-errs(100)-n3000.mat';
+% fileFormat = 'est-result/%s-s%d-%s-errs(100)-n4000.mat';
+fileFormat = 'est-result/%s-s%d-%s-errs(100)-n4000 copy.mat';
+% fileFormat = 'est-result/%s-s%d-%s-errs(100).mat';
+% fileFormat = 'est-result/%s/ILoA_traj_%d-%s-errs-rep(20).mat';
 
 trj_idx = 1;
 filename = sprintf(fileFormat,site_name,trj_idx,device_name);
@@ -24,6 +28,7 @@ load(filename)
 errs3 = errs;
 
 errs = [errs1,errs2,errs3];
+% errs = [errs1];
 
 % errs(8:end,:) = [];
 
@@ -33,7 +38,7 @@ else
     MED_mat = cellfun(@(x) mean(x(3:end)), errs);
 end
 
-true_pos_thr = 3;
+true_pos_thr = 3;                   % beginning index of converged test point
 true_pos = MED_mat<true_pos_thr;
 
 precision_rate = sum(true_pos,2)/size(errs,2)*100;

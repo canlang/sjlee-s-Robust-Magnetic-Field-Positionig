@@ -10,7 +10,7 @@ site_name = 'N1-7F';
 % failure: 15,32,34,35,36
 % loop: 43,
 
-t_input_idx = 11;
+t_input_idx = 43;
 % t_input_idx = 64;     right heading move: have to modify yaw_offset
 % t_input_idx = 29;
 % t_input_idx = 36;
@@ -248,9 +248,15 @@ for i = 1:length(tM)
 %         ps.mag_heading,'UniformOutput',false); 
 %     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
     
-    R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]*(rotMat(:,:,i).')),ps.mag_heading,...
-        'UniformOutput',false); 
-    rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
+%     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]*(rotMat(:,:,i).')),ps.mag_heading,...
+%         'UniformOutput',false); 
+%     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
+    % TODO: ???validated?
+    rotatedMag2 = getHeadingRotatedVector(ps.mag_heading, tM(i,:), rotMat(:,:,i));
+%     if ~isequal(rotatedMag,rotatedMag2)
+%         disp('!!')
+%     end
+    rotatedMag = rotatedMag2;
 
 %     R = arrayfun(@(x) eulerAnglesToRotation3d(x,-euler(1,2),-euler(1,1))...
 %         ,-euler(1,3)-ps.mag_heading,'UniformOutput',false);
@@ -264,12 +270,19 @@ for i = 1:length(tM)
     
     % EUCLIDEAN
     % TODO: may be more optimizable (DONE?maybe)
-%     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
-    mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
+%     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));    
 %     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
+    mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
     
     % COSINE
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
+
+
+    % MALOC
+%     observed = [vecnorm(lM(I,1:2),2,2), lM(I,3)];
+%     measured = [vecnorm(tM(i,1:2),2), tM(i,3)];
+%     mag_dist2 = pdist2(observed, measured,'mahalanobis',nearestSPD(nancov(observed)));
+%     mag_dist = mag_dist2';
 
     if ~all(mag_dist)
         break
