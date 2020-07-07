@@ -202,8 +202,8 @@ xlabel('Error distance (m)')
 set(0,'DefaultAxesColorOrder',brewermap(3,'Set1'))
 
 set(gcf,'units','points','position',[200,500,1100,500])
-% sdf(gcf,'sj3')
-% tightfig(gcf);
+sdf(gcf,'sj6')
+tightfig(gcf);
 
 
 %%

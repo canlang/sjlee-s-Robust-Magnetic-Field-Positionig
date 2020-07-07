@@ -194,8 +194,8 @@ for i = 1:length(tM)
         mag_dist = 0;
     end
 
-    if ~all(mag_dist)
-        break
+    if ~any(mag_dist)
+        disp('im·pov·er·ish·ment')      %% TODO: what do I have to?
     end
     ps.prob = 1./(mag_dist);
     in = isinterior(shp,ps.x,ps.y);
