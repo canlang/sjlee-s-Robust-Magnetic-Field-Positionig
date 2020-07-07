@@ -1,8 +1,8 @@
-function err = ILoA(site_name,device_name,tr_idx,intp_intv,vis_flag,dist_idx, varargin)
+function err = ILoA(n,site_name,device_name,tr_idx,intp_intv,vis_flag,dist_idx, varargin)
 % purpose: convert the localization function - for evaluation loop
 
 %%
-if nargin < 6
+if nargin < 7
     dist_idx = 1;
 end
 
@@ -94,7 +94,7 @@ end
 
 %%
 % initialize particle
-n = 2000;
+% n = 2000;
 % 1. only road
 rand_idx = randi(length(lm.x),n,1);
 ps.x = lm.x(rand_idx);

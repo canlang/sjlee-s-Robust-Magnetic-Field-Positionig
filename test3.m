@@ -13,3 +13,8 @@ rf2 = @(x)rastriginsfcn(x/10);
 % rf2 = @(x)rastriginsfcn(x/10); % objective
 x0 = [20,30]; % start point away from the minimum
 [xf,ff,flf,of] = fminunc(rf2,x0)
+
+%%
+for i=['mamam','fafa']
+    disp(i)
+end
