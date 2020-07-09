@@ -27,7 +27,7 @@ for k = (1:2)
 
     for j = 1:length(intp_candi)
         % the mat file was from the '~~std_validation_parfor_with_interp.m'
-        filename = sprintf('exp_mats/N1-7F-CDF/set1/%s-n1-7f-parfor-%s.mat',method_name{algo_idx},num2str(intp_candi(j)));
+        filename = sprintf('exp_mats/N1-7F-CDF/set2/%s-n1-7f-parfor-%s.mat',method_name{algo_idx},num2str(intp_candi(j)));
         load(filename)
         gt_length = 63;
         true_pos_thr = 3;
@@ -118,7 +118,7 @@ for i=1:2
     end
 end
 grid on
-ylim([0 1.3])
+ylim([0 2])
 
 ylabel('MED (m)')
 xlabel('\delta (m)')
@@ -133,7 +133,7 @@ lgd.NumColumns = 2;
 set(gcf,'units','points','position',[800,100,800,500])
 sdf(gcf,'sj6')
 %%
-close all; clear re_preMat2
+clear re_preMat2
 figure
 n_color = 7;
 
@@ -186,3 +186,10 @@ set(gcf,'units','points','position',[800,1100,800,500])
 sdf(gcf,'sj6')
 
 
+%%
+iloa_err = re_errMat(:,:,1);
+best_iloa = min(iloa_err(:));
+maloc_err = re_errMat(:,:,2);
+best_maloc = min(maloc_err(:));
+(best_maloc-best_iloa)/best_maloc
+best_maloc-best_iloa

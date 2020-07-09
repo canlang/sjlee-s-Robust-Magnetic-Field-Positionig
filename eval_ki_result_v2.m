@@ -1,13 +1,14 @@
 clearvars; close all
 
 % intp_candi = [.1];
-intp_candi = [.2,.3,.5,.8,1,1.2];
-% intp_candi = [.1,.2,.3,.5,.8,1,1.2];
+% intp_candi = [.2,.3,.5,.8,1,1.2];
+intp_candi = [.1,.2,.3,.5,.8,1,1.2];
 
 device_name = 'S9';
 site_name = 'KI-1F';
 n_particle = [3000,4000];
 method_name = {'ILoA','MaLoc'};
+test_trj = 1:3;
 
 n_color = length(intp_candi);
 set(0,'DefaultAxesColorOrder',[colormap(cool(n_color));colormap(copper(n_color))]);
@@ -18,16 +19,16 @@ re_preMat = re_errMat;
 hold on
 for i=1:length(n_particle)
     for k=1:2
-        fileFormat = 'est-result/%s/n%d/%s_traj_%d-%s-errs-rep(20).mat';
+        fileFormat = 'est-result/%s/n%d/%s_traj_%d-%s-errs-rep(100).mat';
 
         errCells = {};
-        for trj_idx = 1:3
+        for trj_idx = test_trj
             filename = sprintf(fileFormat,site_name,n_particle(i),method_name{k},trj_idx,device_name);
             load(filename);
             errCells{trj_idx} = errs;   
         end
         %%
-        errs = [errCells{1:3}];       % can choose only specific trajectory (scenario)
+        errs = [errCells{test_trj}];       % can choose only specific trajectory (scenario)
         %%
         % errs(8:end,:) = [];       % ??
 

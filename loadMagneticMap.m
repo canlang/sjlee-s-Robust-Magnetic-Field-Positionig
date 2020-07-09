@@ -25,7 +25,7 @@ else
     YI = min(y):d:max(y);
     [X,Y] = meshgrid(XI,YI);
     shp = alphaShape(x,y);
-    fprintf('Creating radio map (alpha value=%.1f)\n',shp.Alpha);
+    fprintf('Creating radio map (alpha value=%.1f)...',shp.Alpha);
     
     if strcmp(site_name,'KI-1F')
         shp.Alpha = .6;             % Warning: Duplicate data points have been detected and removed.??
@@ -54,5 +54,6 @@ else
     map = [data1.x, data1.y, newlM(:,3:end)];
     
     save(fullfile(mypath,filename),'map')
+    fprintf('Done.\n');
 end
 

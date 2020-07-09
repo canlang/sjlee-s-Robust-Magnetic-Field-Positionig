@@ -47,7 +47,7 @@ Ahat = (Ahat + Ahat')/2;
 p = 1;
 k = 0;
 while p ~= 0
-  [R,p] = chol(Ahat);
+  [~,p] = chol(Ahat);
   k = k + 1;
   if p ~= 0
     % Ahat failed the chol test. It must have been just a hair off,
@@ -55,6 +55,11 @@ while p ~= 0
     % tweak by adding a tiny multiple of an identity matrix.
     mineig = min(eig(Ahat));
     Ahat = Ahat + (-mineig*k.^2 + eps(mineig))*eye(size(A));
+  end
+  if k > 10000
+      disp('nearestSPD: wrong while loop')
+      mineig = 0.01;
+      Ahat = Ahat + (-mineig*k.^2 + eps(mineig))*eye(size(A));
   end
 end
 

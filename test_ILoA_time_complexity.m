@@ -21,9 +21,10 @@ n_color = length(intp);
 % colormap(brewermap(n_color,'YlOrRd'))
 
 % subplot(121)
-b = semilogy(intp,map_size,'o','markerfacecolor','b');
+b = semilogy(intp,map_size,'ob','markerfacecolor','b');
 grid on
 fit = fit(intp',map_size','power1');
+
 hold on
 plot(fit,intp,map_size)
 strValues = strtrim(cellstr(num2str(map_size(:),'%d')));

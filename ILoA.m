@@ -196,7 +196,7 @@ for i = 1:length(tM)
 
     if ~all(mag_dist)
         disp('im·pov·er·ish·ment')      %% TODO: what do I have to? not seem starvation, what was it?
-        mag_dist(mag_dist==0) = 0.001;
+        mag_dist = 1/n;
     end
     ps.prob = 1./(mag_dist);
     in = isinterior(shp,ps.x,ps.y);

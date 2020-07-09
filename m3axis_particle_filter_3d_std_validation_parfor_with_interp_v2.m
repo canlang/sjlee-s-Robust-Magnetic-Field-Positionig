@@ -3,40 +3,47 @@
 % only N1? test?
 
 clearvars; close all;
-data1 = readtable('batch.csv');
+% data1 = readtable('batch.csv');
 data2 = readtable('20171124 MagCoord3axisData.csv');
-lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
+% lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 method_name = {'ILoA', 'MaLoc'};
 algo_idx = 2;
 fprintf('%s testing...\n',method_name{algo_idx})
 
-% INTERPOLATION
-interp_interval = .8;
-x = data1.x;
-y = data1.y;
-newlM = [];
-for i=1:3
-    z = lM(:,i);
-    XI = min(x):interp_interval:max(x);
-    YI = min(y):interp_interval:max(y);
-    [X,Y] = meshgrid(XI,YI);
-    shp = alphaShape(x,y);
-    in = inShape(shp,X,Y);
-    xg = X(in);
-    yg = Y(in);
-    zg = griddata(x,y,z,xg,yg);         % 2. griddata() : INTERPOLATION
-    if isempty(newlM)
-        newlM = [xg,yg,zg];
-    else
-        newlM = [newlM,zg];
-        if ~isequal(newlM(:,1:2), [xg,yg])
-            disp 'error'
-        end
-    end
-end
-data1 = array2table(newlM(:,1:2), 'VariableNames',{'x','y'});
-lM = newlM(:,3:end);
+%%
+% % INTERPOLATION
+% interp_interval = .8;
+% x = data1.x;
+% y = data1.y;
+% newlM = [];
+% for i=1:3
+%     z = lM(:,i);
+%     XI = min(x):interp_interval:max(x);
+%     YI = min(y):interp_interval:max(y);
+%     [X,Y] = meshgrid(XI,YI);
+%     shp = alphaShape(x,y);
+%     in = inShape(shp,X,Y);
+%     xg = X(in);
+%     yg = Y(in);
+%     zg = griddata(x,y,z,xg,yg);         % 2. griddata() : INTERPOLATION
+%     if isempty(newlM)
+%         newlM = [xg,yg,zg];
+%     else
+%         newlM = [newlM,zg];
+%         if ~isequal(newlM(:,1:2), [xg,yg])
+%             disp 'error'
+%         end
+%     end
+% end
+% data1 = array2table(newlM(:,1:2), 'VariableNames',{'x','y'});
+% lM = newlM(:,3:end);
+%%
+intp_intv = 1;
+map = loadMagneticMap('mats','N1-7F',intp_intv);
+clearvars data1
+data1.x = map(:,1);data1.y = map(:,2);
+lM = map(:,3:5);
 %%
 % nParticleCandidate = 500:500:3000;
 % nRepeat = 500;
@@ -44,7 +51,7 @@ lM = newlM(:,3:end);
 % nRepeat = 500;
 nParticleCandidate = 1000:1000:3000;
 % % nParticleCandidate = [1000 2000];
-nRepeat = 10;
+nRepeat = 50;
 
 % errMat = zeros(length(nParticleCandidate),nRepeat);
 % stdMat = zeros(length(nParticleCandidate),nRepeat);
@@ -110,7 +117,9 @@ for k = 1:length(nParticleCandidate)
 %             R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps_mag_heading,'UniformOutput',false);
 %             rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
             if algo_idx == 1
-                rotatedMag = getHeadingRotatedVector(ps_mag_heading, tM(i,:));
+%                 rotatedMag = getHeadingRotatedVector(ps_mag_heading, tM(i,:), rotMat(:,:,i));
+                R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps_mag_heading,'UniformOutput',false);
+                rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
 
                 % TODO: may be more optimizable (DONE?maybe)
             %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
@@ -119,7 +128,7 @@ for k = 1:length(nParticleCandidate)
             elseif algo_idx == 2
                 observed = [vecnorm(lM(I,1:2),2,2), lM(I,3)];
                 measured = [vecnorm(tM(i,1:2),2), tM(i,3)];
-                mag_dist2 = pdist2(observed, measured,'mahalanobis',nearestSPD(nancov(observed)));
+                mag_dist2 = pdist2(observed, measured,'mahalanobis',nearestSPD(cov(observed)));
                 mag_dist = mag_dist2';
             else        % Unexpedted (wrong) case
                 mag_dist = 0;
@@ -127,7 +136,8 @@ for k = 1:length(nParticleCandidate)
             end
 
             if ~all(mag_dist)
-                break
+                disp('Unexpected: all magnetic distance is zero.')
+                mag_dist = 1/n;
             end
             ps_prob = 1./(mag_dist);
             ps_prob(phy_dist>1) = 0;
@@ -211,7 +221,7 @@ save_dir = fullfile('exp_mats','N1-7F-CDF');
 if ~exist(save_dir,'dir')
     mkdir(save_dir)
 end
-mat_filename = sprintf('%s/%s-n1-7f-parfor-%s.mat',save_dir,method_name{algo_idx},num2str(interp_interval));
+mat_filename = sprintf('%s/%s-n1-7f-parfor-%s.mat',save_dir,method_name{algo_idx},num2str(intp_intv));
 if ~exist(mat_filename,'file')
     save(mat_filename,'convIndexes','errMat','nParticleCandidate')
 else
