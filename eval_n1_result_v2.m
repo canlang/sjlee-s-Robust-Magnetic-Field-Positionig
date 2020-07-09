@@ -87,7 +87,7 @@ lgd.NumColumns = 2;
 % legend(arrayfun(@(x) num2str(x,'\\delta - %1.1f m'), [.1,.8,1.2]...
 %     ,'UniformOutput', false))
 
-set(gcf,'units','points','position',[800,100,800,600])
+set(gcf,'units','points','position',[800,100,800,500])
 % set(gcf,'units','points','position',[800,100,2400,600])
 sdf(gcf,'sj6')
 
@@ -130,7 +130,7 @@ maloc_legend = arrayfun(@(x) num2str(x,'MaLoc (N = %d)'), n_particle...
 lgd = legend([iloa_legend,maloc_legend],'Location','best');
 lgd.NumColumns = 2;
 
-set(gcf,'units','points','position',[800,100,800,600])
+set(gcf,'units','points','position',[800,100,800,500])
 sdf(gcf,'sj6')
 %%
 close all; clear re_preMat2
@@ -182,7 +182,7 @@ maloc_legend = arrayfun(@(x) num2str(x,'MaLoc (\\delta = %1.1f m)'), intp_candi,
 lgd = legend([iloa_legend,maloc_legend],'Location','south');
 lgd.NumColumns = 2;
 
-set(gcf,'units','points','position',[800,1100,800,600])
+set(gcf,'units','points','position',[800,1100,800,500])
 sdf(gcf,'sj6')
 
 
