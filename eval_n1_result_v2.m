@@ -188,8 +188,8 @@ sdf(gcf,'sj6')
 
 %%
 iloa_err = re_errMat(:,:,1);
-best_iloa = min(iloa_err(:));
+mean_iloa = mean(iloa_err(:));
 maloc_err = re_errMat(:,:,2);
-best_maloc = min(maloc_err(:));
-(best_maloc-best_iloa)/best_maloc
-best_maloc-best_iloa
+mean_maloc = mean(maloc_err(:));
+fprintf('ILoA:%1.2f, MaLoc:%1.2f, Imp.%2.1f (%%) \n',...
+    mean_iloa,mean_maloc,(mean_maloc-mean_iloa)/mean_maloc*100);

@@ -1,8 +1,9 @@
 clearvars; close all
 
 % intp_candi = [.1];
+% intp_candi = [1,1.2];                 % 201
 % intp_candi = [.2,.3,.5,.8,1,1.2];
-intp_candi = [.1,.2,.3,.5,.8,1,1.2];
+intp_candi = [.1,.2,.3,.5,.8,1,1.2];    % 20, 100, 
 
 device_name = 'S9';
 site_name = 'KI-1F';
@@ -20,6 +21,7 @@ hold on
 for i=1:length(n_particle)
     for k=1:2
         fileFormat = 'est-result/%s/n%d/%s_traj_%d-%s-errs-rep(100).mat';
+        % 201: [1.0, 1.2], 3000,4000
 
         errCells = {};
         for trj_idx = test_trj
@@ -38,7 +40,7 @@ for i=1:length(n_particle)
             MED_mat = cellfun(@(x) mean(x(3:end)), errs);
         end
 
-        true_positive_err_thr = 5;                   % right?, what is optimal?
+        true_positive_err_thr = 9;                   % right?, what is optimal?
         true_pos = MED_mat<true_positive_err_thr;
 
         precision_rate = sum(true_pos,2)/size(errs,2)*100;
@@ -140,3 +142,17 @@ lgd.NumColumns = 2;
 
 set(gcf,'units','points','position',[1600,100,800,500])
 sdf(gcf,'sj6')
+
+%%
+iloa_err = re_errMat(:,:,1);
+mean_iloa = mean(iloa_err(:));
+maloc_err = re_errMat(:,:,2);
+mean_maloc = mean(maloc_err(:));
+fprintf('ILoA:%1.2f, MaLoc:%1.2f, Imp.%2.1f (%%) \n',...
+    mean_iloa,mean_maloc,(mean_maloc-mean_iloa)/mean_maloc*100);
+% best_maloc-best_iloa
+%% from 201 rep.
+% re_errMat(1,6:7,1) = [1.39,1.59];
+% re_errMat(2,6:7,1) = [1.30,1.62];
+% re_errMat(1,6:7,2) = [1.96,2.59];
+% re_errMat(2,6:7,2) = [1.87,2.54];

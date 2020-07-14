@@ -13,6 +13,7 @@ function rot = getHeadingRotatedVector(heading, v, R)
 % rot = [mag_x, mag_y, v(3)*ones(size(heading))];
 
 A = R.';
+% A = R;
 
 mag_x = arrayfun(@(x) (cos(x)*A(1)-sin(x)*A(2))*v(1)+(cos(x)*A(4)-sin(x)*A(5))*v(2)+(cos(x)*A(7)-sin(x)*A(8))*v(3), heading);
 mag_y = arrayfun(@(x) (sin(x)*A(1)+cos(x)*A(2))*v(1)+(sin(x)*A(4)+cos(x)*A(5))*v(2)+(sin(x)*A(7)+cos(x)*A(8))*v(3), heading);
