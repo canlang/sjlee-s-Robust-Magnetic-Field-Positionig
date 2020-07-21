@@ -1,11 +1,14 @@
 clear;close all;clc;
 
+% ------------------------------------------------------------------------
 % path_dir = 'rawdata';
-path_dir = 'rawdata/test-ki-huawei';
+% path_dir = 'rawdata/test-ki-huawei';
+path_dir = 'rawdata/test-KI-1F-MATE20pro';
 
-target_rawdata_paths = getNameFolds(path_dir);
-rawdata = load_rawdata(fullfile(path_dir,target_rawdata_paths{1})); 
+% target_rawdata_paths = getNameFolds(path_dir);
+% rawdata = load_rawdata(fullfile(path_dir,target_rawdata_paths{1})); 
 
+% ------------------------------------------------------------------------
 % rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{63})); 
 % rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{61})); 
 % rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{43})); 
@@ -14,6 +17,16 @@ rawdata = load_rawdata(fullfile(path_dir,target_rawdata_paths{1}));
 
 % rawdata = load_rawdata('181217_170914_656_N1_긴복도_동쪽방향');
 % rawdata = load_rawdata('181217_171014_406_N1_긴복도_서쪽방향');
+% rawdata = load_rawdata('rawdata/190109_133853_526_N1_연구실시작종료');
+% rawdata = load_rawdata('rawdata/190110_101202_128_N1_연구실시작종료');
+% rawdata = load_rawdata('rawdata/190110_102026_029_N1_연구실시작종료');
+% rawdata = load_rawdata('rawdata/200714_132017_914_doan_straight_return');
+% rawdata = load_rawdata('rawdata/200715_160602_093_n1_r_turn_return');
+rawdata = load_rawdata('rawdata/200717_143220_867_n1_fullcover');
+
+% rawdata = load_rawdata('input_rawdata/190409_172013_390_N1_upper_corridor_rover');
+
+% ------------------------------------------------------------------------
 
 
 raw_acc = rawdata.acc;
@@ -66,7 +79,6 @@ end
 
 euler = quatern2euler(quaternConj(quaternion)) * (180/pi);	% use conjugate for sensor frame relative to Earth and convert to degrees.
 
-
 %%
 estloc = zeros(length(locs),2);
 % phi,theta,psi: roll pitch yaw (aerospace sequence?)
@@ -89,7 +101,7 @@ end
 close all
 figure
 subplot(211)
-yaw = unwrap((euler(:,3)));
+yaw = unwrap((euler(:,3))*pi/180);
 % s_yaw = smoothdata(yaw,'movmedian',0);
 plot(time, deg2rad(yaw))
 xlabel('time (sec)');ylabel('\psi (rad)')

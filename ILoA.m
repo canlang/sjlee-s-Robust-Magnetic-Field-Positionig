@@ -23,7 +23,7 @@ end
 
 %% resample for synchronize
 rate = 2e-2;
-processed_data = resample_rawdata(rawdata,rate);
+processed_data = resample_rawdata2(rawdata,rate);
 
 %% find step point (step) and time labeling
 % threshold should be tuned experimentally to match a person's level 
@@ -37,7 +37,9 @@ AHRS = MadgwickAHRS('SamplePeriod', rate, 'Beta', 0.1); % sample rate: 2e-2
 
 quaternion = zeros(length(processed_data.Time), 4);
 for t = 1:length(processed_data.Time)
-    AHRS.Update(processed_data.Gyroscope(t,:) * (pi/180), ...
+%     AHRS.Update(processed_data.Gyroscope(t,:) * (pi/180), ... % This is
+%     bcause, in 'resample_rawdata' function make rad/s unit with Gyro.
+    AHRS.Update(processed_data.Gyroscope(t,:), ...    
         processed_data.Accelerometer(t,:), ...
         processed_data.Accelerometer(t,:));	% gyroscope units must be radians
     quaternion(t, :) = AHRS.Quaternion;
