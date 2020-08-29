@@ -3,15 +3,19 @@ clear;close all;clc;
 % ------------------------------------------------------------------------
 % path_dir = 'rawdata';
 % path_dir = 'rawdata/test-ki-huawei';
-path_dir = 'rawdata/test-KI-1F-MATE20pro';
+% path_dir = 'rawdata/test-KI-1F-MATE20pro';
 
 % target_rawdata_paths = getNameFolds(path_dir);
 % rawdata = load_rawdata(fullfile(path_dir,target_rawdata_paths{1})); 
 
 % ------------------------------------------------------------------------
+target_rawdata_paths = getNameFolds('rawdata');
 % rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{63})); 
 % rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{61})); 
 % rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{43})); 
+% rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{16})); % for ieee accesS?
+% rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{86}));
+rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{91}));
 % index 9 also available
 % index 36 good sample (tracking visual)
 
@@ -22,43 +26,51 @@ path_dir = 'rawdata/test-KI-1F-MATE20pro';
 % rawdata = load_rawdata('rawdata/190110_102026_029_N1_연구실시작종료');
 % rawdata = load_rawdata('rawdata/200714_132017_914_doan_straight_return');
 % rawdata = load_rawdata('rawdata/200715_160602_093_n1_r_turn_return');
-rawdata = load_rawdata('rawdata/200717_143220_867_n1_fullcover');
+% rawdata = load_rawdata('rawdata/200717_143220_867_n1_fullcover');
 
 % rawdata = load_rawdata('input_rawdata/190409_172013_390_N1_upper_corridor_rover');
 
-% ------------------------------------------------------------------------
-
-
-raw_acc = rawdata.acc;
-raw_gyr = rawdata.gyr;
-acc_time = rawdata.acc_time;
-gyr_time = rawdata.gyr_time;
-acc_mag = rawdata.acc_norm;
 %% resample
-T_acc = timetable(seconds(raw_acc(:,2)/1e9),raw_acc(:,3:5),acc_mag);
-T_gyr = timetable(seconds(raw_gyr(:,2)/1e9),raw_gyr(:,3:5));
-T_acc = sortrows(T_acc);
-T_gyr = sortrows(T_gyr);
+% (1)
+% raw_acc = rawdata.acc;
+% raw_gyr = rawdata.gyr;
+% acc_time = rawdata.acc_time;
+% gyr_time = rawdata.gyr_time;
+% acc_mag = rawdata.acc_norm;
+% T_acc = timetable(seconds(raw_acc(:,2)/1e9),raw_acc(:,3:5),acc_mag);
+% T_gyr = timetable(seconds(raw_gyr(:,2)/1e9),raw_gyr(:,3:5));
+% T_acc = sortrows(T_acc);
+% T_gyr = sortrows(T_gyr);
+% 
+% TT = synchronize(T_acc,T_gyr,'regular','linear','TimeStep',seconds(2e-2));
+% % TT = synchronize(T_acc,T_gyr,'commonrange','linear','TimeStep',seconds(2e-2));
+% % TT = synchronize(T_acc,T_gyr,'intersection','TimeStep',seconds(2e-2));
+% % TT = synchronize(T_acc,T_gyr,'commonrange','linear');
+% 
+% % TT = synchronize(T_acc,T_gyr);
+% % TT = synchronize(T_acc,T_gyr,'regular','nearest','TimeStep',seconds(2e-2));
+% 
+% % TT = synchronize(T_acc,T_gyr,'commonrange','SampleRate',50,'method','nearest');
+% % TT = synchronize(T_acc,T_gyr,'intersection','mean');
+% 
+% Accelerometer = TT.Var1_T_acc;
+% Gyroscope = TT.Var1_T_gyr*180/pi;
+% acc_mag = TT.acc_mag;
+% 
+% time = seconds(TT.Time(:)-(TT.Time(1)));
+% rate = median(diff(time)); % cal sample rate
+% 
+% % acc = resample(acc_mag,time,20);
+% % [Accelerometer,time] = resample(acc_mag, raw_acc(:,2)/1e9,20);
 
-TT = synchronize(T_acc,T_gyr,'regular','linear','TimeStep',seconds(2e-2));
-% TT = synchronize(T_acc,T_gyr,'commonrange','linear','TimeStep',seconds(2e-2));
-% TT = synchronize(T_acc,T_gyr,'intersection','TimeStep',seconds(2e-2));
-% TT = synchronize(T_acc,T_gyr,'commonrange','linear');
-
-% TT = synchronize(T_acc,T_gyr);
-% TT = synchronize(T_acc,T_gyr,'regular','nearest','TimeStep',seconds(2e-2));
-
-% TT = synchronize(T_acc,T_gyr,'commonrange','SampleRate',50,'method','nearest');
-% TT = synchronize(T_acc,T_gyr,'intersection','mean');
-Accelerometer = TT.Var1_T_acc;
-Gyroscope = TT.Var1_T_gyr*180/pi;
-acc_mag = TT.acc_mag;
-
-time = seconds(TT.Time(:)-(TT.Time(1)));
-rate = median(diff(time)); % cal sample rate
-
-% acc = resample(acc_mag,time,20);
-% [Accelerometer,time] = resample(acc_mag, raw_acc(:,2)/1e9,20);
+% (2) 2020.Aug.29
+sample_rate = 2e-2;                                     % reampling rate
+res_data = resample_rawdata2(rawdata, sample_rate);
+acc_mag = res_data.acc_norm;
+rate = sample_rate;
+time = seconds(res_data.Time(:)-(res_data.Time(1)));
+Accelerometer = res_data.Accelerometer;
+Gyroscope = res_data.Gyroscope*180/pi;
 
 %% find step point (step) and time labeling
 % threshold should be tuned experimentally to match a person's level
@@ -70,6 +82,7 @@ minPeakHeight = std(acc_mag);
 %%  
 addpath(genpath('madgwick_algorithm_matlab'));
 AHRS = MadgwickAHRS('SamplePeriod', rate, 'Beta', 0.1); % sample rate: 2e-2
+% AHRS = MahonyAHRS('SamplePeriod', rate, 'Kp', 0.1); % sample rate: 2e-2
 
 quaternion = zeros(length(time), 4);
 for t = 1:length(time)
@@ -103,18 +116,28 @@ figure
 subplot(211)
 yaw = unwrap((euler(:,3))*pi/180);
 % s_yaw = smoothdata(yaw,'movmedian',0);
-plot(time, deg2rad(yaw))
-xlabel('time (sec)');ylabel('\psi (rad)')
+% plot(time, deg2rad(yaw))
+plot(time, (yaw))
+hold on
+% yline(2.5);
+yl = yline(0,'--','y = 0','LineWidth',3);
+% yl = yline(2*pi,'g--','LineWidth',3);
+set(gca,'YTick',0:pi/2:2*pi) 
+set(gca,'YTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'}) 
+ylim([-pi/2, 2*pi])
+xlabel('Time (sec)');ylabel('\psi (rad)')
 % title('time to yaw (rad)')
-subplot(212)
-plot(time, stdfilt(deg2rad(yaw)),'.')
-xlabel('time (sec)');ylabel('\sigma of \psi (rad)')
-% title('time to std (yaw)')
-% plot((euler(:,3)))
-set(gcf,'units','points','position',[500,500,800,500])
-sdf(gcf,'sj2')
 
-figure
+% subplot(212)
+% plot(time, stdfilt(yaw),'.')
+% xlabel('time (sec)');ylabel('\sigma of \psi (rad)')
+% % title('time to std (yaw)')
+% % plot((euler(:,3)))
+% set(gcf,'units','points','position',[500,500,800,500])
+% sdf(gcf,'sj2')
+
+subplot(212)
+% figure
 % subplot(3,2,2:2:4)
 plot(estloc(:,1),estloc(:,2),'xm-','MarkerSize',8)
 xlabel('x (m)');
@@ -123,9 +146,11 @@ ylabel('y (m)');
 axis image
 % axis 'auto'
 grid on
-grid minor
-
-set(gcf,'units','points','position',[1300,500,800,600])
+% grid minor
+ax = gca;
+% set(gcf,'units','points','position',[800, 100, 641, 288])
+set(gcf,'units','points','position',[1096         499         659         673])
+% set(gcf,'units','points','position',[1300,500,800,600])
 sdf(gcf,'sj2')
 
 print -clipboard -dbitmap

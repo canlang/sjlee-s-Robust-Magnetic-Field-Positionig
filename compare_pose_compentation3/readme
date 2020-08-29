@@ -1,0 +1,37 @@
+n = 3000
+203: no pose compenstation
+204: pose compenstation & maloc
+205: no pose compenstation
+
+<<log>> 
+>> test_loop_eval_v2 (203)
+ILoA (n=3000) method testing at KI building...
+GeoMapInt: 0.8, Convergence rate: 72.9, MED: 12.65
+GeoMapInt: 0.8, Convergence rate: 90.1, MED: 2.11
+GeoMapInt: 0.8, Convergence rate: 0.0, MED: 20.61
+Elapsed time is 969.954162 seconds.
+>> test_loop_eval_v2 (204)
+ILoA (n=3000) method testing at KI building...
+GeoMapInt: 0.8, Convergence rate: 95.1, MED: 0.77
+GeoMapInt: 0.8, Convergence rate: 97.5, MED: 1.16
+GeoMapInt: 0.8, Convergence rate: 89.7, MED: 2.06
+Elapsed time is 882.208741 seconds.
+
+>> test_loop_eval_v2 (204)
+MaLoc (n=3000) method testing at KI building...
+Starting parallel pool (parpool) using the 'local' profile ...
+Connected to the parallel pool (number of workers: 4).
+GeoMapInt: 0.8, Convergence rate: 47.5, MED: 1.16
+GeoMapInt: 0.8, Convergence rate: 2.5, MED: 12.57
+GeoMapInt: 0.8, Convergence rate: 72.1, MED: 18.35
+Elapsed time is 753.676100 seconds.
+
+
+(retried, after bug fix - no compensation algorithm)
+
+>> test_loop_eval_v2 (205)
+ILoA (n=3000) method testing at KI building...
+GeoMapInt: 0.8, Convergence rate: 88.8, MED: 29.29
+GeoMapInt: 0.8, Convergence rate: 69.3, MED: 2.62
+GeoMapInt: 0.8, Convergence rate: 41.5, MED: 10.66
+Elapsed time is 928.631701 seconds.

@@ -3,6 +3,7 @@ clearvars;
 Nloop = 2;
 % persistent intp;
 % intp = [.2, .3, .5, .8, 1.0, 1.2];
+% intp = [.8 1.0];
 intp = [.8 1.0];
 dist_algo = {'ILoA','MaLoc'};
 tic

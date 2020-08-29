@@ -1,8 +1,17 @@
 clearvars; close all;
 % rawdata = load_rawdata('rawdata/200714_132017_914_doan_straight_return');
 % rawdata = load_rawdata('rawdata/190109_133853_526_N1_연구실시작종료');
+
 % rawdata = load_rawdata('rawdata/200715_160602_093_n1_r_turn_return');
-rawdata = load_rawdata('rawdata/200717_143220_867_n1_fullcover');
+% rawdata = load_rawdata('rawdata/200717_143220_867_n1_fullcover');
+
+% rawdata = load_rawdata('rawdata/200824_143002_460_north_corridor_0_attitude');
+% rawdata = load_rawdata('rawdata/200824_142818_257_north_corridor_45_attitude');
+% rawdata = load_rawdata('rawdata/200824_142635_533_north_corridor_85_attitude');
+
+% rawdata = load_rawdata('rawdata/200824_125715_776_north_corridor_uturn_0_attitude');
+% rawdata = load_rawdata('rawdata/200824_125537_341_north_corridor_uturn_45_attitude');
+rawdata = load_rawdata('rawdata/200824_125400_817_north_corridor_uturn_85_attitude');
 
 % rawdata = load_rawdata('input_rawdata/190409_172013_390_N1_upper_corridor_rover');
 
@@ -41,10 +50,13 @@ for i=1:length(input_mag)
     output_mag(i,:) = (R_matrix(:,:,i)*input_mag(i,:)')';
 end
 
+addpath(genpath('p_poly_dist'));
 % 1. not optimized
 % estloc = getTrajectory(euler,step_idx);
 % 2. optimized
-load('trajectory/gt_traj_full')
+% load('trajectory/gt_traj_full') % - pair with 200717_143220_867_n1_fullcover
+load('trajectory/gt_traj_north_corridor_eastway_uturn') % - pair with 200824_143002_460_north_corridor_0_attitude
+
 [estloc, c_lambda, ~] = getOptTrajectory(euler,step_idx,gt);
 % cum_lambda = zeros(size(lambda));
 for i=1:length(c_lambda)
@@ -57,7 +69,7 @@ end
 
 map = [estloc output_mag];
 
-mat_filename = fullfile('mats',['magmap-n1-7f-','step','w.mat']);
+mat_filename = fullfile('mats',['magmap-n1-7f-','step-wp','NCE-uturn85.mat']);
 if ~exist(mat_filename,'file')
     save(mat_filename,'map')
 end
@@ -93,3 +105,6 @@ axis image
 % axis 'auto'
 grid on
 grid minor
+
+% sdf(gcf,'sj2')
+% print -clipboard -dbitmap

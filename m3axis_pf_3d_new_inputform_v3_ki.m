@@ -21,6 +21,11 @@ video_flag = 0;
 % end
 
 % heading_noise = .01;        % heading noise candidates: .01, .50
+
+method_name = {'ILoA', 'MaLoc'};
+algo_idx = 2;
+fprintf('%s testing...\n',method_name{algo_idx})
+
 %%
 % (1)
 site_name = 'KI-1F';
@@ -73,7 +78,7 @@ lM = map(:,3:5);
 % #1. old testing data
 % data2 = readtable('20171124 MagCoord3axisData.csv');
 % #2. new collected data (realistic tracking)
-tr_idx = 3;
+tr_idx = 2;
 % device_name = 'MATE20pro';
 device_name = 'S9';
 
@@ -218,6 +223,7 @@ tM = processed_data.Magnetometer(locs,:);
 % test result matrix
 est = zeros(length(tM),3);
 err = zeros(length(tM),n);
+eta = zeros(length(tM),n);
 %%
 switch video_flag
     case 1
@@ -272,35 +278,53 @@ for i = 1:length(tM)
     [phy_dist,I] = pdist2([lm.x,lm.y],[ps.x,ps.y],'euclidean','Smallest',1);
     % 2. calculate Rotated magnetic field data and magnetic distance
     
-%     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),0,...
-%         'UniformOutput',false);
-%     rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
-
-%     (1) UPDATE FUNCTION candidate 
-%     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]*(rotMat(:,:,i))),ps.mag_heading,...
-%         'UniformOutput',false); 
+% %     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),0,...
+% %         'UniformOutput',false);
+% %     rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
+% 
+% %     (1) UPDATE FUNCTION candidate 
+% %     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]*(rotMat(:,:,i))),ps.mag_heading,...
+% %         'UniformOutput',false); 
+% %     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+% %     (2) UPDATE FUNCTION candidate  
+% %     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),ps.mag_heading,...
+% %         'UniformOutput',false); 
+% %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
+% %     (3) UPDATE FUNCTION candidate  
+%     R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])...
+%         ,-ps.mag_heading,'UniformOutput',false); 
 %     rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
-%     (2) UPDATE FUNCTION candidate  
-%     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]/(rotMat(:,:,i))),ps.mag_heading,...
-%         'UniformOutput',false); 
-%     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
-%     (3) UPDATE FUNCTION candidate  
-    R = arrayfun(@(x)(rotMat(:,:,i)*[cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1])...
-        ,-ps.mag_heading,'UniformOutput',false); 
-    rotatedMag = cell2mat(cellfun(@(x)(x.'*tM(i,:)')',R,'UniformOutput',false));
+% 
+% %     R = arrayfun(@(x) euler2rotMat(-euler(1,1),-euler(1,2),x),...
+% %         -euler(1,3)-ps.mag_heading,'UniformOutput',false);
+% %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
+%     
+%     % EUCLIDEAN
+%     % TODO: may be more optimizable (DONE?maybe)
+% %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
+%     mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
+% %     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
+%     
+%     % COSINE
+% %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
 
-%     R = arrayfun(@(x) euler2rotMat(-euler(1,1),-euler(1,2),x),...
-%         -euler(1,3)-ps.mag_heading,'UniformOutput',false);
-%     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
-    
-    % EUCLIDEAN
-    % TODO: may be more optimizable (DONE?maybe)
-%     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));
-    mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
-%     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
-    
-    % COSINE
-%     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'minkowski',3));
+    if algo_idx == 1   
+        % (1) tilting compensation
+%         rotatedMag = getHeadingRotatedVector(ps.mag_heading, tM(i,:), rotMat(:,:,i));
+        % (2) not applied tilting compenstation
+        R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),...
+            ps.mag_heading+euler(i,3),'UniformOutput',false);
+        rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
+        mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
+    elseif algo_idx == 2
+        observed = [vecnorm(lM(I,1:2),2,2), lM(I,3)];
+        measured = [vecnorm(tM(i,1:2),2), tM(i,3)];
+        mag_dist2 = pdist2(observed, measured,'mahalanobis',nearestSPD(cov(observed)));
+        mag_dist = mag_dist2';
+    else        % Unexpedted (wrong) case
+        mag_dist = 0;
+        disp('wrong feature algoithm input');
+    end
 
 
     if ~all(mag_dist)
@@ -359,6 +383,7 @@ for i = 1:length(tM)
     
 %     err(i,:) = pdist2([data2.coord_x(i),data2.coord_y(i)],[ps.x,ps.y]);
     err(i,:) = pdist2([mean(ps.x),mean(ps.y)],[ps.x,ps.y]);
+    eta(i,:) = ps.mag_heading';
 %     break
 %     pause(.1)
     switch video_flag
@@ -416,8 +441,8 @@ sdf(gcf,'sj')
 % print -depsc2 eps/18times_repeat_circle.eps
 
 %%
-figure
-subplot(311)
+% figure
+subplot(211)
 % (1)
 % histogram(wrapTo2Pi(ps.phy_heading))
 % xlabel('Physical Heading')
@@ -425,45 +450,76 @@ subplot(311)
 % set(gca,'XTick',0:pi/2:2*pi) 
 % set(gca,'XTickLabel',{'0','pi/2','pi','3pi/2','2pi'}) 
 % (2)
-plot(est(:,3))
+% plot(est(:,3))
+plot(wrapTo2Pi(est(:,3)),'x-')
+% (3)
+% [lineh, bandsh] = fanChart(1:size(eta,1),eta, 'mean', 10:10:90, ...
+%     'alpha', .2, 'colormap', {'shadesOfColor', [0 0 .8]});
+% txt = strcat({'Pct'}, cellstr(int2str((20:20:80)')));
+% legend([bandsh;lineh], [txt;{'Mean'}])
+
 grid on
-ylim([-pi pi])
-set(gca,'YTick',-pi:pi/2:pi) 
-set(gca,'YTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi',}) 
+% ylim([-pi pi])
+ylim([0 2*pi])
+xlim([0,length(est)])
+% set(gca,'YTick',-pi:pi/2:pi) 
+% set(gca,'YTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi',}) 
+set(gca,'YTick',0:pi/2:2*pi) 
+set(gca,'YTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'}) 
 xlabel('input index')
-ylabel('Magnetic \Delta (rad)')
+ylabel('\eta (rad)')
 
-subplot(312)
-plot(euler(:,3))
-grid on
-ylim([-pi pi])
-set(gca,'YTick',-pi:pi/2:pi) 
-set(gca,'YTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi',}) 
+subplot(212)
+% plot(euler(:,3))
+% grid on
+% ylim([-pi pi])
+% xlim([0,length(est)])
+% set(gca,'YTick',-pi:pi/2:pi) 
+% set(gca,'YTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi',}) 
+
+% histogram visualize
+x = 1:size(eta,1);
+y = eta;
+xRep = repmat(x, 1, n);
+h = histogram2(xRep(:),y(:),[size(eta,1), 100],'DisplayStyle','tile','Normalization','probability');
+set(gca,'YTick',0:pi/2:2*pi) 
+set(gca,'YTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'}) 
+
 xlabel('input index')
-ylabel('Relative \psi (rad)')
+ylabel('\eta (rad)')
 
-subplot(313)
-% stem(wrapTo2Pi(ps.mag_heading),ones(n,1))
+% subplot(313)
+% % stem(wrapTo2Pi(ps.mag_heading),ones(n,1))
+% 
+% % histogram(wrapTo2Pi(ps.mag_heading),n/2)
+% % xlabel('Latest Time Magnetic Heading')
+% % xlim([0 2*pi])
+% % set(gca,'XTick',0:pi/2:2*pi) 
+% % set(gca,'XTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'})
+% 
+% turn_thr = .15;
+% [~,turn_locs] = findpeaks(std_euler,'MinPeakHeight',turn_thr);
+% findpeaks(std_euler,'MinPeakHeight',turn_thr)
+% xlim([0,length(est)])
 
-% histogram(wrapTo2Pi(ps.mag_heading),n/2)
-% xlabel('Latest Time Magnetic Heading')
-% xlim([0 2*pi])
-% set(gca,'XTick',0:pi/2:2*pi) 
-% set(gca,'XTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'})
-
-turn_thr = .15;
-[~,turn_locs] = findpeaks(std_euler,'MinPeakHeight',turn_thr);
-findpeaks(std_euler,'MinPeakHeight',turn_thr)
 
 set(gcf,'units','points','position',[800,100,900,700])
-sdf(gcf,'sj')
+sdf(gcf,'sj2')
 
+% save('mats/iloa_success_ki_tr3.mat','est','eta')
 %%
 gt_filename = sprintf('est-result/ki-gt-s%d.json',tr_idx);
 gt = jsondecode(fileread(gt_filename));
 % converged_est = [est(converge_idx:end,1), est(converge_idx:end,2)];
+
+% copied line 484
+turn_thr = .15;
+[~,turn_locs] = findpeaks(std_euler,'MinPeakHeight',turn_thr);
+
 est_testpts = [est(turn_locs,1),est(turn_locs,2)];
-diag(pdist2(gt(2:end,:), est_testpts))
+disp('error to gt')
+err2gt = diag(pdist2(gt(2:end,:), est_testpts));
+disp(err2gt)
 return
 %% for papaer figure (without map image)
 close all

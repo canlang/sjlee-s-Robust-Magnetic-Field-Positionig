@@ -8,7 +8,7 @@ video_flag = 0;
 % failure: 15,32,34,35,36
 % loop: 43,
 
-t_input_idx = 61;
+t_input_idx = 61;       % N1 (2Floor)
 % t_input_idx = 29;
 % t_input_idx = 36;
 

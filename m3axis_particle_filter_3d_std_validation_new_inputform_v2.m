@@ -1,4 +1,5 @@
-clear; close all;
+% clear;
+close all;
 % purpose: convert the step length as a latent variable
 
 % flag: Video save
@@ -10,21 +11,38 @@ site_name = 'N1-7F';
 % failure: 15,32,34,35,36
 % loop: 43,
 
-t_input_idx = 43;
-% t_input_idx = 64;     right heading move: have to modify yaw_offset
-% t_input_idx = 29;
-% t_input_idx = 36;
+% t_input_idx = 43;     % 16-loop
+% t_input_idx = 64;     % right heading move: have to modify yaw_offset
+% t_input_idx = 29;     % Sumin C123B weird result
+% t_input_idx = 36;     % Daegwon? D432A weird result
+% t_input_idx = 16;       % IEEE Access (fig. example)
 
-switch t_input_idx
-    case 43
-        video_filename = 'm3axis_2d-space_pf_real-time-input_loop-traj';        %input index = 43;
-    otherwise
-        video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_6';%nonshifted input??
+t_input_idx = 92;       % IEEE Access (different attitude), 87-89
+% load('mats/magmap-n1-7f-step-wpNCE0.mat','map')
+
+if true(find(t_input_idx == 87:95))
+    atti = [85 45 0];
+%     gt_filename = sprintf('mats/magmap-n1-7f-step-wpNCE-uturn%d copy.mat',atti(t_input_idx-86));
+    gt_filename = sprintf('mats/magmap-n1-7f-step-wpNCE%d.mat',atti(t_input_idx-89));
+    load(gt_filename,'map');
+    err = zeros(length(map),1);
+    gt.x = map(:,1);gt.y = map(:,2);
 end
+
+% t_input_idx = 41;   
+% C start trace: 29,35,41,79,80
 
 % heading_noise = .01;        % heading noise candidates: .01, .50
 %%
-map = magmap_construction('mats',site_name,.6);
+
+
+% map = magmap_construction('mats',site_name,.6);
+% map = magmap_construction('mats',site_name,.8);
+intp_intv = .6;
+map = loadMagneticMap('mats',site_name,intp_intv);
+
+% load('mats/magmap-n1-7f-stepw-full-opt.mat','map')
+
 lm.x = map(:,1);lm.y = map(:,2);
 lM = map(:,3:5);
 
@@ -42,8 +60,12 @@ lM = map(:,3:5);
 % #1. old testing data
 % data2 = readtable('20171124 MagCoord3axisData.csv');
 % #2. new collected data (realistic tracking)
+
 target_rawdata_paths = getNameFolds('rawdata');
+fprintf('loading %s data...\n',target_rawdata_paths{t_input_idx});
 rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{t_input_idx}));
+
+
 
 % tr_idx = 1;
 % test_data_paths = dir('rawdata/test-n1-7f-iphone/*.csv');
@@ -51,7 +73,11 @@ rawdata = load_rawdata(fullfile('rawdata',target_rawdata_paths{t_input_idx}));
 
 %% resample for synchronize
 rate = 2e-2;
-processed_data = resample_rawdata(rawdata,rate);
+% TODO: refactoring
+processed_data = resample_rawdata(rawdata,rate);          
+% differ: gryo radian, time column
+% processed_data = resample_rawdata2(rawdata,rate);
+% processed_data.Gyroscope = processed_data.Gyroscope*(180/pi);
 
 %% find step point (step) and time labeling
 % threshold should be tuned experimentally to match a person's level 
@@ -134,9 +160,10 @@ ps.y = lm.y(rand_idx);
 % ps.y = random('Uniform', min(lm.y),max(lm.y),n,1);
 
 % 3. initial area
-% ps.x = data2.coord_x(1)+random('normal',0,5,n,1);
-% ps.y = data2.coord_y(1)+random('normal',0,5,n,1);
-% ps.y = 15+random('normal',0,5,n,1);
+% % ps.x = data2.coord_x(1)+random('normal',0,5,n,1);
+% % ps.y = data2.coord_y(1)+random('normal',0,5,n,1);
+% ps.x = 7+random('normal',0,5,n,1);
+% ps.y = 12+random('normal',0,5,n,1);
 
 ps.sl = ones(n,1)*.7;
 ps.mag_heading = random('Uniform', 0,2*pi,n,1);
@@ -169,11 +196,19 @@ tM = processed_data.Magnetometer(locs,:);
 
 % test result matrix
 est = zeros(length(tM),3);
-err = zeros(length(tM),n);
+AD = zeros(length(tM),n);
+eta = zeros(length(tM),n);      % heading diff 
 %%
+switch t_input_idx
+    case 43
+        video_filename = 'm3axis_2d-space_pf_real-time-input_loop-traj';        %input index = 43;
+    otherwise
+%         video_filename = 'm3axis_2d_pf_nonshiftedinput_newinput_rotated_6';%nonshifted input??
+        video_filename = target_rawdata_paths{t_input_idx};
+end
 switch video_flag
     case 1
-        v = VideoWriter(strcat('movie_files/',video_filename,'.mp4'),'MPEG-4');
+        v = VideoWriter(strcat('vids/',video_filename,'.mp4'),'MPEG-4');
         v.FrameRate = 10;
         v.Quality = 100;
         open(v);
@@ -252,11 +287,11 @@ for i = 1:length(tM)
 %         'UniformOutput',false); 
 %     rotatedMag = cell2mat(cellfun(@(x)(x*tM(i,:)')',R,'UniformOutput',false));
     % TODO: ???validated?
-    rotatedMag2 = getHeadingRotatedVector(ps.mag_heading, tM(i,:), rotMat(:,:,i));
+%     rotatedMag2 = getHeadingRotatedVector(ps.mag_heading, tM(i,:), rotMat(:,:,i));
 %     if ~isequal(rotatedMag,rotatedMag2)
 %         disp('!!')
 %     end
-    rotatedMag = rotatedMag2;
+%     rotatedMag = rotatedMag2;
 
 %     R = arrayfun(@(x) eulerAnglesToRotation3d(x,-euler(1,2),-euler(1,1))...
 %         ,-euler(1,3)-ps.mag_heading,'UniformOutput',false);
@@ -272,6 +307,11 @@ for i = 1:length(tM)
     % TODO: may be more optimizable (DONE?maybe)
 %     mag_dist = diag(pdist2(rotatedMag,lM(I,:),'euclidean'));    
 %     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
+%     mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
+    
+    % ILoA, line 256, 260, 276
+    rotatedMag2 = getHeadingRotatedVector(ps.mag_heading, tM(i,:), rotMat(:,:,i));
+    rotatedMag = rotatedMag2;
     mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
     
     % COSINE
@@ -338,11 +378,11 @@ for i = 1:length(tM)
 %     est(i,:) = [mean(ps.x),mean(ps.y),mean(abs(angdiff(ps.mag_heading,0)))];        %x,y,heading
 %     est(i,:) = [mean(ps.x),mean(ps.y),circ_mean(ps.mag_heading-pi)]; 
     est(i,:) = [mean(ps.x),mean(ps.y),circ_mean(ps.mag_heading)]; 
+    eta(i,:) = wrapTo2Pi(ps.mag_heading'); 
     
 %     err(i,:) = pdist2([data2.coord_x(i),data2.coord_y(i)],[ps.x,ps.y]);
-    err(i,:) = pdist2([mean(ps.x),mean(ps.y)],[ps.x,ps.y]);
-%     break
-%     pause(.1)
+    AD(i,:) = pdist2([mean(ps.x),mean(ps.y)],[ps.x,ps.y]);
+    
     switch video_flag
         case 1
         frame = getframe(gcf);
@@ -350,7 +390,7 @@ for i = 1:length(tM)
     end
 end
 switch video_flag, case 1, close(v);end
-% %%
+%%
 % close all
 % subplot(121)
 % err_std = std(err,0,2);
@@ -362,11 +402,17 @@ switch video_flag, case 1, close(v);end
 % set(gcf,'units','points','position',[200,500,2000,800])
 % sdf(gcf,'sj2')
 % return
-
+%%
+% close all
+% std_AD = std(AD,0,2);
+% converge_idx = find(std_AD <= 2,1);
+% % heading_err = pdist2(euler(:,3),est(:,3));
+% ecdf(abs(euler(converge_idx:end,3)+est(converge_idx:end,3)));
+% return
 %%
 figure
-err_std = std(err,0,2);
-converge_idx = find(err_std <= 2,1);
+std_AD = std(AD,0,2);
+converge_idx = find(std_AD <= 2,1);
 tracking_show_with_map = true;
 if tracking_show_with_map
     A = imread('map/N1-7F.png','BackgroundColor',[1 1 1]);
@@ -410,7 +456,7 @@ subplot(211)
 % set(gca,'XTickLabel',{'0','pi/2','pi','3pi/2','2pi'}) 
 % (2)
 plot(wrapTo2Pi(est(:,3)),'-')
-
+% (3)
 grid on
 % ylim([-pi pi])
 % set(gca,'YTick',-pi:pi/2:pi) 
@@ -423,16 +469,16 @@ set(gca,'YTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'})
 xlabel('input index')
 ylabel('\eta (rad)')
 
-subplot(212)
-plot(euler(:,3))
-grid on
-ylim([-pi pi])
-set(gca,'YTick',-pi:pi/2:pi) 
-set(gca,'YTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi',}) 
-xlabel('input index')
-ylabel('\Delta \psi (rad)')
+% subplot(212)
+% plot(euler(:,3))
+% grid on
+% ylim([-pi pi])
+% set(gca,'YTick',-pi:pi/2:pi) 
+% set(gca,'YTickLabel',{'-\pi','-\pi/2','0','\pi/2','\pi',}) 
+% xlabel('input index')
+% ylabel('\Delta \psi (rad)')
 
-% subplot(313)
+% subplot(212)
 % % stem(wrapTo2Pi(ps.mag_heading),ones(n,1))
 % histogram(wrapTo2Pi(ps.mag_heading),n/2)
 % xlabel('Latest Time Magnetic Heading')
@@ -440,8 +486,38 @@ ylabel('\Delta \psi (rad)')
 % set(gca,'XTick',0:pi/2:2*pi) 
 % set(gca,'XTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'})
 
+subplot(212)
+x = 1:size(eta,1);
+y = eta;
+n = 2000;
+xRep = repmat(x, 1, n); 
+histogram2(xRep(:),eta(:),[size(eta,1), 100],...
+    'DisplayStyle','tile','Normalization','probability');
+set(gca,'YTick',0:pi/2:2*pi) 
+set(gca,'YTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'}) 
+ylabel('\eta (rad)')
+xlabel('Step (index)')
+c = colorbar;
+ylabel( c, 'Probability' );
+% caxis([0, 3e-3]);
+
 set(gcf,'units','points','position',[800,100,900,500])
 sdf(gcf,'sj')
+
+figure
+[lineh, bandsh] = fanChart(1:size(eta,1),eta, 'mean', 10:10:90, ...
+    'alpha', .2, 'colormap', {'shadesOfColor', [0 0 .8]});
+txt = strcat({'Pct'}, cellstr(int2str((20:20:80)')));
+legend([bandsh;lineh], [txt;{'Mean'}])
+%%
+set(gca,'YTick',0:pi/2:2*pi) 
+set(gca,'YTickLabel',{'0','\pi/2','\pi','3\pi/2','2\pi'}) 
+ylabel('\eta (rad)')
+xlabel('Step (index)')
+sdf(gcf,'sj4')
+
+%%
+% save(sprintf('mats/iloa_success_n1_7f_%s.mat',target_rawdata_paths{t_input_idx}),'est','eta')
 
 return
 
@@ -478,8 +554,8 @@ sdf(gcf,'sj')
 
 %% for papaer figure (without map image)
 close all
-err_std = std(err,0,2);
-converge_idx = find(err_std <= 2,1);
+std_AD = std(AD,0,2);
+converge_idx = find(std_AD <= 2,1);
 
 axis equal
 
@@ -529,9 +605,9 @@ set(gcf,'units','points','position',[300,100,1000,800])
 sdf(gcf,'sj2')
 %%
 clf
-err = sqrt(sum((est(:,1:2)-[data2.coord_x data2.coord_y]).^2,2));
+AD = sqrt(sum((est(:,1:2)-[data2.coord_x data2.coord_y]).^2,2));
 yyaxis left
-plot(err,'s:','MarkerSize',8)
+plot(AD,'s:','MarkerSize',8)
 xlabel('Index of Test Data ')
 ylabel('Error Distance (m)')
 

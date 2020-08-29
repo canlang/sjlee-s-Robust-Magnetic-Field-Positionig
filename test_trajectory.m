@@ -24,10 +24,10 @@ set(gcf,'units','points','position',[300,300,2000,600])
 
 % shapewrite(shp,'main_n17f_roads.shp')
 
-% x1 = [9 22 22]            % replaced manual GUI: drawpolyline
+% x1 = [9 22 22]            % replaced manual GUI -> drawpolyline
 % y1 = [21 21 8.5]
-% roi = drawpolyline;  
-% gt = roi.Position;
+roi = drawpolyline;  
+gt = roi.Position;
 % save('trajectory/gt_traj','gt')
 %%
 addpath(genpath('p_poly_dist'));
@@ -78,7 +78,8 @@ for i=1:length(gt)-1
     
     subplot(2,2,i)
     hold on
-    plot(loc1(:,1),loc1(:,2),'x-')
+    plot(div_gt(:,1),div_gt(:,2),'x-')
+%     plot(loc1(:,1),loc1(:,2),'x-')
     plot(loc2(:,1),loc2(:,2),'x-')
     axis equal
 end

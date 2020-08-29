@@ -43,7 +43,6 @@ for i=1:length(gt)-1
     estloc(t_idx,:) = getTrajectory(euler,div_step_idx,start_loc,opt_lambda,opt_eta);    
 end
 %%
-addpath(genpath('p_poly_dist'));
 function a = myfun(e,si,gt,lambda,eta,varargin)
     if nargin == 4 
         loc = getTrajectory(e,si,gt(1,:),lambda);

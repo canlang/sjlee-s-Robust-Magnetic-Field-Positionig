@@ -3,11 +3,12 @@ clear; close all;
 addpath('xyz file operations')
 
 
-site_name = 'KI-1F';
-% site_name = 'N1-7F';
+% site_name = 'KI-1F';
+site_name = "N1-7F";
 A = imread(sprintf('map/%s.png',site_name),'BackgroundColor',[1 1 1]);
 
 switch site_name
+    
     case 'KI-1F'
         map = magmap_construction('mats',site_name,.1);
         x = map(:,1);
@@ -41,8 +42,12 @@ axis xy
 hold on
 
 %%
+if site_name == "KI-1F"
+    [X,Y,Z] = interpolation_by_alphashape(x,y,z,0.5);
+else
+    [X,Y,Z] = interpolation_by_alphashape(x,y,z);
+end
 
-[X,Y,Z] = interpolation_by_alphashape(x,y,z);
 
 % When alpha shape draw (need modify function in interpolation_by_alphashape)
 % set(gca,'XTick',[]);
@@ -65,7 +70,7 @@ hold on
 %%
 h = contourf(X,Y,Z);
 hcb = colorbar;
-ylabel(hcb, 'L2 norm of Magnetic Field')
+ylabel(hcb, 'L2 norm of Magnetic Field (\muT)')
 % ylabel(hcb, 'X compoment of Magnetic Field')
 % ylabel(hcb, 'Y compoment of Magnetic Field')
 % ylabel(hcb, 'Z compoment of Magnetic Field')
@@ -90,14 +95,18 @@ ylabel(hcb, 'L2 norm of Magnetic Field')
 % saveas(gcf,'eps/alphashape.eps','epsc');
 % export_fig eps/alphashape.eps -depsc -m2
 %% INTERPOLATION by alphashape
-function [X,Y,Z] = interpolation_by_alphashape(x,y,z)
+function [X,Y,Z] = interpolation_by_alphashape(x,y,z,alpha)
 XI = min(x):.5:max(x);
 YI = min(y):.5:max(y);
 [X,Y] = meshgrid(XI,YI);
 
 % APPLY ALPHA SHAPE 
 shp = alphaShape(x,y);
-shp.Alpha = .5;
+if nargin > 3
+    % shp.Alpha = .5;     % for KI building
+    shp.Alpha = alpha;     % for KI building
+end
+
 % plot(shp,'EdgeColor','k')
 % % plot(shp,'FaceAlpha',0.7,'EdgeAlpha',.7,'LineWidth',0.3)
 % % plot(shp,'FaceColor','red','FaceAlpha',0.3,'LineWidth',0.3)

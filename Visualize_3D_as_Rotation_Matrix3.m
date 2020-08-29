@@ -157,8 +157,8 @@ hold off
 % caxis([20 200])
 % colorbar
 % colormap(parula(5))
-%% 
-print -depsc2 eps/rotation_similarity_3d_1.eps
+%% 3D visualize for heading error 
+% print -depsc2 eps/rotation_similarity_3d_1.eps
 %%
 [~,max_similar_I] = max(Z);
 plot(rad2deg(radian_x(max_similar_I)),'o-')

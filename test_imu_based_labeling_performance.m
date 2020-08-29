@@ -1,14 +1,15 @@
 clearvars;close all;
 % most source referenced from ILoA.m
-load('mats/magmap-n1-7f-stepw.mat','map');
+% load('mats/magmap-n1-7f-stepw-full-opt.mat','map');
+load('mats/magmap-n1-7f-stepw-t-turn.mat','map');
 
 lm.x = map(:,1);lm.y = map(:,2);
 lM = map(:,3:5);
 
-% test_dataset = '200715_160602_093_n1_r_turn_return';
+test_dataset = '200715_160602_093_n1_r_turn_return';
 % test_dataset = '190228_161229_230-B3C';
 % test_dataset = '190228_160953_233-D431A';
-test_dataset = '190228_shoon_A13B';
+% test_dataset = '190228_shoon_A13B';
 
 
 test_path = sprintf('rawdata/%s',test_dataset);
@@ -24,7 +25,7 @@ testdata = resample_rawdata2(rawdata,rate);
 minPeakHeight = std(testdata.acc_norm);       
 [~,locs] = findpeaks(testdata.acc_norm,'MinPeakDistance',.3/rate,'MinPeakHeight',minPeakHeight);
 
-% addpath(genpath('madgwick_algorithm_matlab'));
+addpath(genpath('madgwick_algorithm_matlab'));
 AHRS = MadgwickAHRS('SamplePeriod', rate, 'Beta', 0.1); % sample rate: 2e-2
 
 quaternion = zeros(length(testdata.Time), 4);
@@ -55,8 +56,8 @@ h_ps = scatter(ps.x,ps.y,20,'c','filled','MarkerFaceAlpha',.2);
 h_pm = plot(mean(ps.x),mean(ps.y),'ms');
 legend('reference point','particle','estimated location','location','best')
 hold off
-ylim([5, 25])
-xlim([5, 83])
+% ylim([5, 25])
+% xlim([5, 83])
 
 frame = getframe(gcf);
 writeVideo(v,frame);

@@ -2,9 +2,11 @@
 % previous script was used in TMC manuscript
 % only N1? test?
 
-clearvars; close all;
-% data1 = readtable('batch.csv');
+clearvars; close all; clc;
+
+% TEST DATASET
 data2 = readtable('20171124 MagCoord3axisData.csv');
+% data1 = readtable('batch.csv');
 % lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 method_name = {'ILoA', 'MaLoc'};
@@ -39,11 +41,20 @@ fprintf('%s testing...\n',method_name{algo_idx})
 % data1 = array2table(newlM(:,1:2), 'VariableNames',{'x','y'});
 % lM = newlM(:,3:end);
 %%
-intp_intv = 1;
+% (1)
+% intp_intv = 1;
+intp_intv = .8;
 map = loadMagneticMap('mats','N1-7F',intp_intv);
-clearvars data1
+% clearvars data1
 data1.x = map(:,1);data1.y = map(:,2);
 lM = map(:,3:5);
+
+% (2)
+% attitude_degree=0;
+% load(sprintf('mats/magmap-n1-7f-step-wpNCE-uturn%d.mat',attitude_degree),'map')
+% data1.x = map(:,1);data1.y = map(:,2);
+% lM = map(:,3:5);
+
 %%
 % nParticleCandidate = 500:500:3000;
 % nRepeat = 500;
@@ -116,7 +127,7 @@ for k = 1:length(nParticleCandidate)
             % 2. calculate magnetic distance
 %             R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps_mag_heading,'UniformOutput',false);
 %             rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
-            if algo_idx == 1
+            if algo_idx == 1        %TODO: may seem critical bug (not yet applied hotfix)
 %                 rotatedMag = getHeadingRotatedVector(ps_mag_heading, tM(i,:), rotMat(:,:,i));
                 R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps_mag_heading,'UniformOutput',false);
                 rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
@@ -221,7 +232,13 @@ save_dir = fullfile('exp_mats','N1-7F-CDF');
 if ~exist(save_dir,'dir')
     mkdir(save_dir)
 end
-mat_filename = sprintf('%s/%s-n1-7f-parfor-%s.mat',save_dir,method_name{algo_idx},num2str(intp_intv));
+
+if exist('intp_intv','var')
+    mat_filename = sprintf('%s/%s-n1-7f-parfor-%s.mat',save_dir,method_name{algo_idx},num2str(intp_intv));
+else
+    mat_filename = sprintf('%s/%s-n1-7f-parfor-atti_%d.mat',save_dir,method_name{algo_idx},attitude_degree);
+end
+
 if ~exist(mat_filename,'file')
     save(mat_filename,'convIndexes','errMat','nParticleCandidate')
 else

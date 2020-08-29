@@ -15,6 +15,26 @@ x0 = [20,30]; % start point away from the minimum
 [xf,ff,flf,of] = fminunc(rf2,x0)
 
 %%
-for i=['mamam','fafa']
+for i=["mamam","fafa"]
     disp(i)
 end
+%%
+clearvars;clc;
+% a = magic(3)
+% 
+% hold on
+% plot(a(:,1))
+% plot(a(:,2))
+% plot(a(:,3))
+% hold off
+
+
+x = linspace(0,7);
+y = ones(length(x),9);
+for i = 1:9
+    y(:,i) = sin(x-i/5)';
+end
+plot(x,y)
+
+line_type = {'--', '-', ':'}; 
+set(gca,'LineStyleOrder',line_type)
