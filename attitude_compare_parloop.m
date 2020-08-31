@@ -100,7 +100,7 @@ for j=1:length(atti)
 
         %%
         % initialize particle
-        n = 2000;
+        n = 3000;
         % 1. only road
         rand_idx = randi(length(lm_x),n,1);
         ps_x = lm_x(rand_idx);
@@ -245,8 +245,18 @@ end
 %%
 close all
 figure
+x1 = vertcat(errs{1})/pi*180; x2 = vertcat(errs{2})/pi*180; x3 = vertcat(errs{3})/pi*180;
+x4 = vertcat(errs{4})/pi*180;
+x = [x3;x4;x2;x1];
+g = [ones(size(x3)); 2*ones(size(x4)); 3*ones(size(x2)); 4*ones(size(x1))];
+boxplot(x,g)
+fprintf('0deg:%.2f, 20deg:%.2f, 45deg:%.2f, 90deg:%.2f\n',mean(x3),mean(x4),mean(x2),mean(x1));
+
+figure
 hold on
-for i=1:4
-    ecdf(vertcat(errs{:,i})/pi*180)
+for i=1:2
+    cdfplot(vertcat(errs{:,i})/pi*180)
 end
-legend('85','45','0','20')
+cdfplot(vertcat(errs{:,4})/pi*180)
+cdfplot(vertcat(errs{:,3})/pi*180)
+legend('85','45','20','0')
