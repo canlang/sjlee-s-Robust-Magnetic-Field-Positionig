@@ -19,6 +19,7 @@ for i=1:length(gt)-1
     
     div_step_idx = step_idx(t_idx);
     div_gt = gt(i:i+1,:);
+    gt_path_length = sqrt( sum( abs( diff( div_gt ) ).^2, 2 ));
 
     if i == 1
         start_loc = div_gt(1,:);
@@ -45,8 +46,13 @@ end
 %%
 function a = myfun(e,si,gt,lambda,eta,varargin)
     if nargin == 4 
+        % euler, step index, ground truth, lambda = error offset(?)
         loc = getTrajectory(e,si,gt(1,:),lambda);
-        [a, ~] = p_poly_dist(loc(:,1),loc(:,2),gt(:,1),gt(:,2));
+        % distance between path line
+        [a, ~] = p_poly_dist(loc(:,1),loc(:,2),gt(:,1),gt(:,2));    
+        % distance between each (steped) points
+        step_lengths = sqrt( sum( abs( diff( loc ) ).^2, 2 ));
+        a = [a;abs(step_lengths-mean(step_lengths))];
     elseif nargin == 5
         loc = getTrajectory(e,si,gt(1,:),lambda,eta);
         a = sqrt(sum((loc(end,:)-gt(end,:)).^2,2));

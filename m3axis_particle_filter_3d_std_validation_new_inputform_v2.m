@@ -17,13 +17,19 @@ site_name = 'N1-7F';
 % t_input_idx = 36;     % Daegwon? D432A weird result
 % t_input_idx = 16;       % IEEE Access (fig. example)
 
-t_input_idx = 92;       % IEEE Access (different attitude), 87-89
+t_input_idx = 90;       % IEEE Access (different attitude), 87-89
 % load('mats/magmap-n1-7f-step-wpNCE0.mat','map')
 
-if true(find(t_input_idx == 87:95))
+if true(find(t_input_idx == 87:89))
     atti = [85 45 0];
 %     gt_filename = sprintf('mats/magmap-n1-7f-step-wpNCE-uturn%d copy.mat',atti(t_input_idx-86));
     gt_filename = sprintf('mats/magmap-n1-7f-step-wpNCE%d.mat',atti(t_input_idx-89));
+    load(gt_filename,'map');
+    err = zeros(length(map),1);
+    gt.x = map(:,1);gt.y = map(:,2);
+end
+if t_input_idx == 94
+    gt_filename = sprintf('mats/magmap-n1-7f-step-wpNCE%d.mat',90);
     load(gt_filename,'map');
     err = zeros(length(map),1);
     gt.x = map(:,1);gt.y = map(:,2);

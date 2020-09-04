@@ -1,6 +1,15 @@
 clear; close all;
-data1 = readtable('batch.csv');
-lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
+% learnig data
+% % (1)
+% data1 = readtable('batch.csv');
+% lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
+% (2)
+attitude_degree=90;
+load(sprintf('mats/magmap-n1-7f-step-wpNCE%d.mat',attitude_degree),'map')
+data1.x = map(:,1);data1.y = map(:,2);
+lM = map(:,3:5);
+
+% test data
 data2 = readtable('20171124 MagCoord3axisData.csv');
 
 %%
@@ -20,8 +29,9 @@ plot(data1.x,data1.y,'.','MarkerSize', 10)
 legend('reference point')
 set(gca,'XTick',[]);
 set(gca,'YTick',[]);
-sdf(gcf,'sj4')
-print -depsc2 eps/env_setting.eps
+% sdf(gcf,'sj4')
+% disp('save an EPS file...')
+% print -depsc2 eps/env_setting.eps
 % export_fig eps/env_setting.eps -depsc -m2
 
 % axis equal
@@ -31,7 +41,7 @@ print -depsc2 eps/env_setting.eps
 
 %%
 % initialize particle
-n = 1000;
+n = 2000;
 % 1. only road
 rand_idx = randi(length(data1.x),n,1);
 ps.x = data1.x(rand_idx);
@@ -111,9 +121,9 @@ for i = 1:length(tM)
     mag_dist = sqrt(sum((rotatedMag-lM(I,:)).^2,2));
 %     mag_dist = bsxfun(@(x,y) pdist([x;y]), rotatedMag,lM(I,:));
 
-    % related work: Horizontal & Vertical components, MaLoc, B_h,B_v
-    mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
-    mag_dist = mag_dist2';
+%     % related work: Horizontal & Vertical components, MaLoc, B_h,B_v
+%     mag_dist2 = pdist2([vecnorm(lM(I,1:2),2,2), lM(I,3)], [vecnorm(tM(i,1:2),2), tM(i,3)],'mahalanobis');
+%     mag_dist = mag_dist2';
 
     if all(mag_dist) == 0
         break
@@ -174,7 +184,7 @@ if video_flag close(v);end
 % set(gcf,'units','points','position',[200,500,2000,800])
 % sdf(gcf,'sj2')
 % return
-disp ('current: MaLoc result')
+disp ('current: ILoa result')
 %%
 close all
 % figure

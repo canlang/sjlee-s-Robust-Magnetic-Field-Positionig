@@ -30,7 +30,7 @@ set(gcf,'units','points','position',[700,500,1000,350])
 % tightfig
 legend('reference point')
 % legend('reference point','location','best')   
-sdf(gcf,'sj4')
+% sdf(gcf,'sj4')
 % print -depsc2 eps/env_setting.eps
 
 % axis equal
@@ -116,7 +116,7 @@ for i = 1:length(tM)
     % Converted 'getHeadingRotatedVector' function
 %     R = arrayfun(@(x)([cos(x) -sin(x) 0;sin(x) cos(x) 0;0 0 1]),ps.mag_heading,'UniformOutput',false);
 %     rotatedMag = cell2mat(cellfun(@(x)((x*tM(i,:)')'),R,'UniformOutput',false));
-    rotatedMag = getHeadingRotatedVector(ps.mag_heading, tM(i,:));
+    rotatedMag = getHeadingRotatedVector(ps.mag_heading, tM(i,:), [1 0 0; 0 1 0; 0 0 1]);
 %     if ~isequal(rotatedMag,rotatedMag2)
 %         disp('error convert')
 %     end

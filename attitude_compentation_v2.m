@@ -2,9 +2,14 @@ clearvars;close all;clc;
 target_rawdata_paths = getNameFolds('rawdata');
 % data_idxes = 87:89;
 % data_idxes = 92:-1:90;      % 0 45 84
-data_idxes = 92:94;      % 0 20 90
+% data_idxes = 92:94;      % 0 20 90
+data_idxes = [92,91,94];     % 0 45 90
 % data_idxes = 95:-1:93;
 atti = [0,45,90];
+
+mag_norm = cell(1,3);
+raw_mags = cell(1,3);
+rot_mags = cell(1,3);
 
 for i=1:3
     dataset_idx = data_idxes(i);
@@ -44,67 +49,64 @@ for i=1:3
 %         rot_mag(t,:) = (quatern2rotMat(quaternConj(AHRS.Quaternion))*processed_data.Magnetometer(t,:)')';
         rot_mag(t,:) = quatrotate(quaternConj(AHRS.Quaternion),processed_data.Magnetometer(t,:));
     end
-    
+    mag_norm{i} = vecnorm(processed_data.Magnetometer,2,2);
+    raw_mags{i} = processed_data.Magnetometer;
+    rot_mags{i} = rot_mag;
+end
+%%
+close all; 
+n_color = 3;
+bar_cmap = cool(n_color);
+set(0,'DefaultAxesColorOrder',bar_cmap);
+
+ax_LineStyleOrder = {'-','--',':'};
+for i=1:3
     subplot(3,4,1+4*(i-1))
     A = imread(sprintf('jpg/attitude_%d.jpg',atti(i)));    
     R = imrotate(A,-90);
     I = imcrop(R,[0 600 3024 2800]);
     imshow(I)
-    title(sprintf('Attitude#%d (θ ≈ %d°)',i,atti(i)))
+    title(sprintf('Atti.Group#%d (θ ≈ %d°)',i,atti(i)))
     
-%     subplot(3,3,1+1*(i-1))  
-    subplot(3,4,2+4*(i-1))
-    mag_norm = vecnorm(processed_data.Magnetometer,2,2);
-    plot(mag_norm)
+    subplot(3,4,6)    
+    hold on
+    plot(mag_norm{i},ax_LineStyleOrder{i})
 %     ylim([-60 50])
-    legend('L^{2}-norm')
+    legend('Atti.G.#1','Atti.G.#2','Atti.G.#3');
     ylabel('\muT')
-    title(sprintf('L^{2} norm (θ ≈ %d°)',atti(i)))
-
-%     subplot(3,3,4+1*(i-1))
-    subplot(3,4,3+4*(i-1))
-    mag_x = processed_data.Magnetometer(:,1);
-    mag_y = processed_data.Magnetometer(:,2);
-    mag_z = processed_data.Magnetometer(:,3);
-    plot([mag_x,mag_y,mag_z])
-    ylabel('\muT')
-%     hold on
-%     plot(mag_x)    
-%     plot(mag_y,'-.')    
-%     plot(mag_z,':')    
-%     hold off
-%     grid on
-    ylim([-80 40])
-%     yticks(-80:40:50)
-    lgd = legend('x','y','z','location','southeast');
-    lgd.NumColumns = 3;
-    title(sprintf('Raw 3-axis (θ ≈ %d°)',atti(i)))
+    title(sprintf('L^{2}-norm',atti(i)))
     
-%     subplot(3,3,7+1*(i-1))
-    subplot(3,4,4+4*(i-1))
-    rot_mag_x = rot_mag(:,1);
-    rot_mag_y = rot_mag(:,2);
-    rot_mag_z = rot_mag(:,3);
-    plot([rot_mag_x,rot_mag_y,rot_mag_z])    
-    ylabel('\muT')
-%     hold on
-%     plot(rot_mag_x)    
-%     plot(rot_mag_y,'--')    
-%     plot(rot_mag_z,':')    
-%     hold off
-%     grid on
-    ylim([-80 40])   
-%     yticks(-80:40:50)
-    lgd = legend('x','y','z','location','southeast');
-    lgd.NumColumns = 3;   
-    title(sprintf('Calibrated 3-axis (θ ≈ %d°)',atti(i)))
+    ylabels = {'x','y','z'};
+    
+    for j=1:3
+        subplot(3,4,3+(j-1)*4)
+        hold on
+        raw_mag = raw_mags{i}(:,j);
+        plot(raw_mag,ax_LineStyleOrder{i})
+        ylabel('\muT')
+        title(sprintf('raw %s',ylabels{j}));
+%         legend('Atti.G.#1','Atti.G.#2','Atti.G.#3');
+    end
+    
+    for j=1:3
+        subplot(3,4,4+(j-1)*4)
+        hold on
+        rot_mag = rot_mags{i}(:,j);
+        plot(rot_mag,ax_LineStyleOrder{i})
+        ylabel('\muT')
+        title(sprintf('calibrated %s',ylabels{j}));
+%         legend('Atti.G.#1','Atti.G.#2','Atti.G.#3');
+    end
 end
+set(gcf,'units','points','position',[300,500,1100,500])
+
 %     ax = gca;
 %     ax.LineStyleOrder = {'-','--',':'};
 % set(gca,'LineStyleOrder',{'-','--o',':s'},'ColorOrder','g')
 % sgtitle('Mag')
 
 % sdf(gcf,'sj2')  % for response
-sdf(gcf,'sj4')  % for paper
-set(gcf,'units','points','position',[300,500,1600,700])
+% sdf(gcf,'sj5')  % for paper
+sdf(gcf,'paperwidth')  % for paper
+
 % tightfig

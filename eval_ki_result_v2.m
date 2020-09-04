@@ -115,8 +115,8 @@ maloc_legend = arrayfun(@(x) num2str(x,'MaLoc (N = %d)'), n_particle...
 lgd = legend([iloa_legend,maloc_legend],'Location','best');
 lgd.NumColumns = 2;
 
-set(gcf,'units','points','position',[800,100,800,500])
-sdf(gcf,'sj6')
+set(gcf,'units','points','position',[800,100,600,400])
+sdf(gcf,'paperwidth')
 
 %%
 figure
@@ -140,8 +140,8 @@ maloc_legend = arrayfun(@(x) num2str(x,'MaLoc (\\delta = %1.1f m)'), intp_candi,
 lgd = legend([iloa_legend,maloc_legend],'Location','south');
 lgd.NumColumns = 2;
 
-set(gcf,'units','points','position',[1600,100,800,500])
-sdf(gcf,'sj6')
+set(gcf,'units','points','position',[1600,100,600,400])
+sdf(gcf,'paperwidth')
 
 %%
 iloa_err = re_errMat(:,:,1);

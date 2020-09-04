@@ -5,7 +5,7 @@ close all;
 
 site_name = 'N1-7F';
 atti = [85 45 0 20];
-repeat = 2;
+repeat = 10;
 errs = {repeat,length(atti)};
 
 for j=1:length(atti)

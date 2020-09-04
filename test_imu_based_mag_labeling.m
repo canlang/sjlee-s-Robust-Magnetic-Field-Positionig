@@ -5,13 +5,16 @@ clearvars; close all;
 % rawdata = load_rawdata('rawdata/200715_160602_093_n1_r_turn_return');
 % rawdata = load_rawdata('rawdata/200717_143220_867_n1_fullcover');
 
-% rawdata = load_rawdata('rawdata/200824_143002_460_north_corridor_0_attitude');
+rawdata = load_rawdata('rawdata/200824_143002_460_north_corridor_0_attitude');
 % rawdata = load_rawdata('rawdata/200824_142818_257_north_corridor_45_attitude');
 % rawdata = load_rawdata('rawdata/200824_142635_533_north_corridor_85_attitude');
+% rawdata = load_rawdata('rawdata/200831_143043_955_north_corridor_90_attitude');
+atti = 0;
 
 % rawdata = load_rawdata('rawdata/200824_125715_776_north_corridor_uturn_0_attitude');
 % rawdata = load_rawdata('rawdata/200824_125537_341_north_corridor_uturn_45_attitude');
-rawdata = load_rawdata('rawdata/200824_125400_817_north_corridor_uturn_85_attitude');
+% rawdata = load_rawdata('rawdata/200824_125400_817_north_corridor_uturn_85_attitude');
+
 
 % rawdata = load_rawdata('input_rawdata/190409_172013_390_N1_upper_corridor_rover');
 
@@ -55,24 +58,32 @@ addpath(genpath('p_poly_dist'));
 % estloc = getTrajectory(euler,step_idx);
 % 2. optimized
 % load('trajectory/gt_traj_full') % - pair with 200717_143220_867_n1_fullcover
-load('trajectory/gt_traj_north_corridor_eastway_uturn') % - pair with 200824_143002_460_north_corridor_0_attitude
+% load('trajectory/gt_traj_north_corridor_eastway_uturn') % - pair with 200824_125400_817_north_corridor_uturn_85_attitude
+load('trajectory/gt_traj_north_corridor_eastway') % - pair with 200824_143002_460_north_corridor_0_attitude
 
-[estloc, c_lambda, ~] = getOptTrajectory(euler,step_idx,gt);
-% cum_lambda = zeros(size(lambda));
-for i=1:length(c_lambda)
-%     cum_lambda(i:end,1) = cum_lambda(i:end,1) + lambda(i);
-    el = c_lambda(i);
-    output_mag(i,:) = ([cosd(el) -sind(el) 0;...
-                        sind(el)  cosd(el) 0;...
-                        0         0        1]*output_mag(i,:)')';
-end
-
+% (0) just interpolate  %TODO: just work only one path
+estloc_x = linspace(gt(1,1),gt(2,1),length(step_idx));
+estloc_y = linspace(gt(1,2),gt(2,2),length(step_idx));
+estloc = [estloc_x' estloc_y'];
 map = [estloc output_mag];
 
-mat_filename = fullfile('mats',['magmap-n1-7f-','step-wp','NCE-uturn85.mat']);
-if ~exist(mat_filename,'file')
-    save(mat_filename,'map')
-end
+% % (1) Get optimal trajcetory and rotate the magnetic field
+% [estloc, c_lambda, ~] = getOptTrajectory(euler,step_idx,gt);
+% % cum_lambda = zeros(size(lambda));
+% for i=1:length(c_lambda)
+% %     cum_lambda(i:end,1) = cum_lambda(i:end,1) + lambda(i);
+%     el = c_lambda(i);
+%     output_mag(i,:) = ([cosd(el) -sind(el) 0;...
+%                         sind(el)  cosd(el) 0;...
+%                         0         0        1]*output_mag(i,:)')';
+% end
+% map = [estloc output_mag];
+
+mat_filename = fullfile('mats',['magmap-n1-7f-','step-wp',sprintf('NCE%d.mat',atti)]);
+save(mat_filename,'map')
+% if ~exist(mat_filename,'file')
+%     save(mat_filename,'map')
+% end
 
 %% plotting and visualize trajectory
 subplot(2,1,1)

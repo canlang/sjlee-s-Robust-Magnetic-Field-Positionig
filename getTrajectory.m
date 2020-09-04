@@ -10,7 +10,7 @@ end
 if nargin >= 4
     % 1. first version
 %     euler(step_idx,3) = euler(step_idx,3) + lambda;
-    % 2. weigtht chaining, assume: weight event is not independent
+    % 2. weight of yaw chaining, because i assumed: weight event is not independent
     for i=1:length(lambda)        
         euler(step_idx(i:end),3) = euler(step_idx(i:end),3) + lambda(i);
     end

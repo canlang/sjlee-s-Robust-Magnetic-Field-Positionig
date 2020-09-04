@@ -10,7 +10,7 @@ data2 = readtable('20171124 MagCoord3axisData.csv');
 % lM = [data1.magnet_x,data1.magnet_y,data1.magnet_z];
 
 method_name = {'ILoA', 'MaLoc'};
-algo_idx = 2;
+algo_idx = 1;
 fprintf('%s testing...\n',method_name{algo_idx})
 
 %%
@@ -42,18 +42,18 @@ fprintf('%s testing...\n',method_name{algo_idx})
 % lM = newlM(:,3:end);
 %%
 % (1)
-% intp_intv = 1;
-intp_intv = .8;
-map = loadMagneticMap('mats','N1-7F',intp_intv);
-% clearvars data1
-data1.x = map(:,1);data1.y = map(:,2);
-lM = map(:,3:5);
-
-% (2)
-% attitude_degree=0;
-% load(sprintf('mats/magmap-n1-7f-step-wpNCE-uturn%d.mat',attitude_degree),'map')
+% % intp_intv = 1;
+% intp_intv = .8;
+% map = loadMagneticMap('mats','N1-7F',intp_intv);
+% % clearvars data1
 % data1.x = map(:,1);data1.y = map(:,2);
 % lM = map(:,3:5);
+
+% (2)
+attitude_degree=90;
+load(sprintf('mats/magmap-n1-7f-step-wpNCE%d.mat',attitude_degree),'map')
+data1.x = map(:,1);data1.y = map(:,2);
+lM = map(:,3:5);
 
 %%
 % nParticleCandidate = 500:500:3000;
@@ -62,7 +62,7 @@ lM = map(:,3:5);
 % nRepeat = 500;
 nParticleCandidate = 1000:1000:3000;
 % % nParticleCandidate = [1000 2000];
-nRepeat = 50;
+nRepeat = 5;
 
 % errMat = zeros(length(nParticleCandidate),nRepeat);
 % stdMat = zeros(length(nParticleCandidate),nRepeat);

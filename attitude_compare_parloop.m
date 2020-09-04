@@ -245,8 +245,8 @@ end
 %%
 close all
 figure
-x1 = vertcat(errs{1})/pi*180; x2 = vertcat(errs{2})/pi*180; x3 = vertcat(errs{3})/pi*180;
-x4 = vertcat(errs{4})/pi*180;
+x1 = vertcat(errs{:,1})/pi*180; x2 = vertcat(errs{:,2})/pi*180; x3 = vertcat(errs{:,3})/pi*180;
+x4 = vertcat(errs{:,4})/pi*180;
 x = [x3;x4;x2;x1];
 g = [ones(size(x3)); 2*ones(size(x4)); 3*ones(size(x2)); 4*ones(size(x1))];
 boxplot(x,g)

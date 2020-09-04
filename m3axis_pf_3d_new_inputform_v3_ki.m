@@ -78,7 +78,7 @@ lM = map(:,3:5);
 % #1. old testing data
 % data2 = readtable('20171124 MagCoord3axisData.csv');
 % #2. new collected data (realistic tracking)
-tr_idx = 2;
+tr_idx = 3;
 % device_name = 'MATE20pro';
 device_name = 'S9';
 
